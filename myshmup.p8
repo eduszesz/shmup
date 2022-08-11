@@ -23,6 +23,7 @@ function _init()
 	e_bullets={}
 	smokes={}
 	explosions={}
+	debris={}
 	mkstars()
 		
 end
@@ -60,8 +61,8 @@ function _update()
 	if ship.y<0 then
 		ship.y=0
 	end
-	if ship.y>120 then
-		ship.y=120
+	if ship.y>118 then
+		ship.y=118
 	end
 	if t%4<2 then
 		ship.fl=5
@@ -89,8 +90,24 @@ function _update()
 			del(bullets,b)
 		end
 	end
+	
+	--update e_bullets
+	for eb in all(e_bullets) do
+		eb.y+=eb.sy
+		if eb.y<-10 then
+			del(e_bullets,eb)
+		end
+	end
+	
+	
 	--update enemies
 	for e in all(enemies) do
+		if t%30==0 then	
+			if rnd()>0.5 then
+				e.imm=true
+				ene_fire(e.x,e.y+4)
+			end
+		end	
 		e.y+=e.sy
 		if e.y>128 then
 			e.y=-10
@@ -111,9 +128,13 @@ function _update()
 					e.imm=true
 					e.h-=1
 				end
-				explode(e.x+4,e.y+4)
+				sfx(2)
+				fracture(e.x+4,e.y+4)
+				explode(e.x+4,e.y+6,2,10)
 			end
 			if e.h<0 then
+					explode(e.x+4,e.y+6)
+					sfx(3)
 					del(enemies,e)
 				end
 		end
@@ -134,14 +155,7 @@ function _draw()
 		pset(s.x,s.y,s.cl)
 	end
 	
-	--player
-	spr(ship.sp,ship.x,ship.y)
-	if ship.sx!=0 or 
-			ship.sy!=0 then
-		spr(ship.fl,ship.x,ship.y+8)
-	else
-		spr(ship.fli,ship.x,ship.y+8)	
-	end
+	
 	--bullets
 	for b in all(bullets) do
 		if t%4<2 then
@@ -151,6 +165,17 @@ function _draw()
 		end
 		spr(b.sp,b.x,b.y)
 	end
+	
+	--enemies bullets
+	for eb in all(e_bullets) do
+		if t%8<4 then
+			eb.sp=34
+		else
+			eb.sp=35
+		end
+		spr(eb.sp,eb.x,eb.y)
+	end
+	
 	
 	--enemies
 	for e in all(enemies) do
@@ -173,19 +198,22 @@ function _draw()
 		pal()
 	end
 	
-	--smokes
-	for sk in all(smokes) do
-		if sk.age>0 then
-			sk.age-=1
-		end
-		circfill(ship.x+3,ship.y-1,sk.age,sk.cl)
-		if sk.age<=0 then
-			del(smokes,sk)
-		end
-	end
-	
 	--explosions
 	mkexplosions()
+	--debris
+	mkdebris()
+	
+	--player
+	spr(ship.sp,ship.x,ship.y)
+	if ship.sx!=0 or 
+			ship.sy!=0 then
+		spr(ship.fl,ship.x,ship.y+8)
+	else
+		spr(ship.fli,ship.x,ship.y+8)	
+	end
+	
+	--smokes
+	drsmokes(ship.x,ship.y)
 	
 end
 
@@ -214,7 +242,7 @@ function fire()
 								y=ship.y-4,
 								sx=0,
 								sy=-5,
-								box={x1=3,y1=0,x2=6,y2=7}}
+								box={x1=2,y1=0,x2=6,y2=7}}
 	add(bullets,b)
 end
 
@@ -224,6 +252,19 @@ function mksmoke()
 								age=5}
 	add(smokes,sk)
 end
+
+function drsmokes(_x,_y)
+	for sk in all(smokes) do
+		if sk.age>0 then
+			sk.age-=1
+		end
+		circfill(_x+3,_y-1,sk.age,sk.cl)
+		if sk.age<=0 then
+			del(smokes,sk)
+		end
+	end
+end
+
 
 --collision
 function abs_box(s)
@@ -262,36 +303,75 @@ function mkenemy()
 								h=5,
 								imm=false,
 								age=0,
-								box={x1=3,y1=0,x2=6,y2=7}}
+								box={x1=0,y1=0,x2=7,y2=7}}
 	add(enemies,e)							
 end
 
 function explode(_x,_y,_typ,_age)
 	if _typ==nil then _typ=1 end
-	if _age==nil then _age=6 end
+	if _age==nil then _age=20 end
 	local ex={
 									x=_x,
 									y=_y,
 									typ=_typ,
-									r=_age/2,
+									r=0,
 									age=_age,
-									cl={7,10,9,8,2},
-									cli=1}
+									cl={7,10,9,8,5,5},
+									cli=0}
 	add(explosions,ex)								
 end
 
 function mkexplosions()
 	for ex in all(explosions) do
-		ex.r+=1
+		ex.r+=2
 		ex.cli+=1
-		if ex.cli>5 then ex.cli=1 end
-		circfill(ex.x,ex.y,ex.r,ex.cl[ex.cli])
+		if ex.cli>5 then ex.cli=0 end	
+		circ(ex.x,ex.y,ex.r,ex.cl[ex.cli])
+		if ex.typ==1 then
+			circfill(ex.x,ex.y,ex.r*0.5,9)
+			circfill(ex.x,ex.y,ex.r*0.25,10)
+			circfill(ex.x,ex.y,50/ex.r,7)
+		end	
 		if ex.r>ex.age then
 			del(explosions,ex)
 		end
 	end
 end
 
+function fracture(_x,_y)
+	for i=1,2 do
+		local d={
+								x=_x,
+								y=_y,
+								sx=rnd(4)-2,
+								sy=rnd(4)-2,
+								age=10}
+		add(debris,d)
+	end						
+end
+
+function mkdebris()
+	for d in all(debris) do
+		d.x+=d.sx
+		d.y+=d.sy
+		d.age-=1
+		pset(d.x,d.y,7)
+		if d.age<0 then
+			del(debris,d)
+		end
+	end
+end
+
+function ene_fire(_x,_y)
+	local eb={
+								sp=32,
+								x=_x,
+								y=_y,
+								sx=0,
+								sy=2,
+								box={x1=2,y1=2,x2=6,y2=6}}
+	add(e_bullets,eb)
+end
 __gfx__
 0000000000d61000000d60000001d600000170000009100000098000000800000000000000000000000000000000000000000000000000000000000000000000
 0000000001d61050501d61050501d6100087a800008a98000008000000008000000ee000000ee000000ee000000ee00000333300000000000000000000333300
@@ -310,13 +390,15 @@ b00000b0b00000bbb00000b0000000bb0b000b00000000000000000000b000b00088880000888800
 0b00000b0b00000b0b00000b0b00000bbbaaaab00b66bb0000bb66b00baaaabb0800008008000080088008808880088806566560066556600656656006655660
 b00000000b00000000b000000b00000bb00000b0bbaaaab00baaaabb0b00000b00000000000000000000000000000000068aaa6006a8aa6006aa8a6006aaa860
 00099000000990000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-009aa900009779000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-0097a900009a79000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-00977900009aa9000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-00099000000990000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-00009000000900000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-00900000000009000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+009aa9000097790000000000000ff000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+0097a900009a79000008800000f88f00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00977900009aa900008ee8000f8ee8f0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+0009900000099000008ee8000f8ee8f0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00009000000900000008800000f88f00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+009000000000090000000000000ff000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 0000a000000a00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 __sfx__
 000100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 19020000220001a0511701113021100310e0410b0410a051070510406102061020710000000501005000050000500005000050000500005000050000500005000050000500005000050000500005000050000500
+00020000106101a610126000c60000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+c80400002d636286162461622616206161b616196161661614616116160e6160e6160000500004000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
