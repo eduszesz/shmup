@@ -6,6 +6,7 @@ __lua__
 
 function _init()
 	t=0
+	score=0
 	ship={
 		sp=2,
 		x=64,
@@ -14,6 +15,7 @@ function _init()
 		sy=0,
 		fl=4,
 		fli=6,
+		h=4,
 		imm=false,
 		age=0,
 		box={x1=0,y1=0,x2=7,y2=7}}
@@ -105,6 +107,8 @@ function _update()
 				flash=10
 				fracture(ship.x+4,ship.y+4,"ship")
 				explode(ship.x+4,ship.y+4,2,10)
+				ship.h-=1
+				del(e_bullets,eb)
 			end
 		end
 		if eb.y<-10 then
@@ -140,14 +144,16 @@ function _update()
 					sfx(2)
 					fracture(ex,ey,e.typ)
 					explode(ex,ey,2,10*e.wd)
+					del(bullets,b)
+					if e.h<1 then
+						explode(ex,ey,1,20*e.wd)
+						sfx(3)
+						shake=5*e.wd
+						del(enemies,e)
+						score+=1
+					end
 				end
 			end
-			if e.h<1 then
-					explode(ex,ey,1,20*e.wd)
-					sfx(3)
-					shake=5*e.wd
-					del(enemies,e)
-				end
 		end
 	end
 	
@@ -223,6 +229,18 @@ function _draw()
 	--debris
 	mkdebris()
 	
+	--ui
+	for i=1,4 do
+		spr(50,9*i,1)
+	end
+	for i=1,ship.h do
+		spr(48,9*i,1)
+	end
+	if score==0 then
+		print("score:"..score,54,2,7)
+	else
+		print("score:"..score.."00",54,2,7)
+	end
 end
 
 function mkstars()
