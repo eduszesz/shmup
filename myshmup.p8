@@ -6,6 +6,7 @@ __lua__
 
 function _init()
 	t=0
+	state="start"
 	score=0
 	ship={
 		sp=2,
@@ -39,72 +40,152 @@ end
 
 function _update()
 	t+=1
-	ship.sp=2
-	ship.sx=0
-	ship.sy=0
-	if btn(0) then
-		ship.sp=1
-		ship.sx=-3
-	end
-	if btn(1) then
-		ship.sp=3
-		ship.sx=3
-	end
-	if btn(2) then
-		ship.sy=-3
-	end
-	if btn(3) then
-		ship.sy=3
+	
+	if state=="start" then
+		update_start()
 	end
 	
-	ship.x+=ship.sx
-	ship.y+=ship.sy
-	
-	if ship.x<0 then
-		ship.x=0
-	end
-	if ship.x>120 then
-		ship.x=120
+	if state=="game" then
+		update_game()
 	end
 	
-	if ship.y<0 then
-		ship.y=0
-	end
-	if ship.y>118 then
-		ship.y=118
-	end
-	if t%4<2 then
-		ship.fl=5
-		ship.fli=7
-	else
-		ship.fl=4
-		ship.fli=6
+	if state=="over" then
+		update_over()
 	end
 	
-	if btn(4) then
-		if ftimer<=0 then
-			fire()
-			mksmoke()
-			sfx(1)
-			ftimer=frate
-		end	
+
+		
+end
+
+function _draw()
+	cls()
+	
+	if state=="start" then
+		draw_start()
 	end
-	ftimer-=1
+	
+	if state=="game" then
+		draw_game()
+	end
+	
+	if state=="over" then
+		draw_over()
+	end
+	
+	mkshake()
+	mkflash()
+	
+end
+
+function update_start()
 	if btnp(5) then
-		mkenemy()
+		state="game"
 	end
+end
+
+function update_game()
+	upbullets()
 	
+	upe_bullets()
+		
+	upenemies()
 	
-	--update bullets
+	upplayer()
+		
+	immortal(ship,20)
+end
+
+function update_over()
+
+end
+
+function draw_start()
+	local cl=7
+	if t%16<8 then
+		cl=5
+	end
+	drstars()
+	cprint("press x/❎ to start",63,64,1)
+	cprint("press x/❎ to start",63,65,1)
+	cprint("press x/❎ to start",64,64,cl)
+end
+
+function draw_game()
+	drstars()
+		
+	drbullets()
+	
+	dre_bullets()
+	
+	drenemies()
+	
+	drplayer()
+	
+	--smokes
+	drsmokes(ship.x,ship.y)
+	--explosions
+	mkexplosions()
+	--debris
+	mkdebris()
+	
+	drui()
+end
+
+function draw_over()
+
+end
+
+function mkstars()
+	for i=1,50 do
+		local s={
+									x=rnd(128),
+									y=rnd(128),
+									sy=rnd(1)+1,
+									cl=flr(rnd(4)+7)}
+		if rnd()>0.15 then
+			s.cl=7
+		end
+		if s.sy<1.4 then
+			s.cl=13
+		end						
+		add(stars,s)							
+	end
+end
+
+function drstars()
+	for s in all(stars) do
+		s.y+=s.sy
+		if s.y>128 then
+			s.y=-10
+			s.x=rnd(128)
+		end
+		pset(s.x,s.y,s.cl)
+	end
+end
+
+function upbullets()
 	for b in all(bullets) do
 		b.y+=b.sy
 		if b.y<-10 then
 			del(bullets,b)
 		end
 	end
-	
-	--update e_bullets
+end
+
+function drbullets()
+	for b in all(bullets) do
+		if t%4<2 then
+			b.sp=32
+		else
+			b.sp=33
+		end
+		spr(b.sp,b.x,b.y)
+	end
+end
+
+function upe_bullets()
 	for eb in all(e_bullets) do
+		eb.x+=eb.sx
 		eb.y+=eb.sy
 		if coll(eb,ship) then
 			if not ship.imm then
@@ -121,14 +202,25 @@ function _update()
 			del(e_bullets,eb)
 		end
 	end
-	
-	
-	--update enemies
+end
+
+function dre_bullets()
+	for eb in all(e_bullets) do
+		if t%8<4 then
+			eb.sp=34
+		else
+			eb.sp=35
+		end
+		spr(eb.sp,eb.x,eb.y)
+	end
+end
+
+function upenemies()
 	for e in all(enemies) do
 		if t%30==0 then	
 			if rnd()>0.5 then
 				e.imm=true
-				ene_fire(e.x+(-4+4*e.wd),e.y+(4*e.ht))
+				ene_fire(e.x+(-4+4*e.wd),e.y+(4*e.ht),rnd(),2)
 			end
 		end	
 		e.y+=e.sy
@@ -162,49 +254,9 @@ function _update()
 			end
 		end
 	end
-	
-	immortal(ship,20)
-		
 end
 
-function _draw()
-	cls()
-	
-	mkshake()
-	mkflash()
-	--stars
-	for s in all(stars) do
-		s.y+=s.sy
-		if s.y>128 then
-			s.y=-10
-			s.x=rnd(128)
-		end
-		pset(s.x,s.y,s.cl)
-	end
-	
-	
-	--bullets
-	for b in all(bullets) do
-		if t%4<2 then
-			b.sp=32
-		else
-			b.sp=33
-		end
-		spr(b.sp,b.x,b.y)
-	end
-	
-	--enemies bullets
-	for eb in all(e_bullets) do
-		if t%8<4 then
-			eb.sp=34
-		else
-			eb.sp=35
-		end
-		spr(eb.sp,eb.x,eb.y)
-	end
-	
-	
-	--enemies
+function drenemies()
 	for e in all(enemies) do
 		if t%(6*e.wd)==0 then
 			e.sp+=e.wd
@@ -216,8 +268,66 @@ function _draw()
 		spr(e.sp,e.x,e.y,e.wd,e.ht)
 		pal()
 	end
+end
+
+function upplayer()
+	ship.sp=2
+	ship.sx=0
+	ship.sy=0
+	if btn(0) then
+		ship.sp=1
+		ship.sx=-3
+	end
+	if btn(1) then
+		ship.sp=3
+		ship.sx=3
+	end
+	if btn(2) then
+		ship.sy=-3
+	end
+	if btn(3) then
+		ship.sy=3
+	end
 	
-	--player
+	ship.x+=ship.sx
+	ship.y+=ship.sy
+	
+	if ship.x<0 then
+		ship.x=0
+	end
+	if ship.x>120 then
+		ship.x=120
+	end
+	
+	if ship.y<9 then
+		ship.y=9
+	end
+	if ship.y>118 then
+		ship.y=118
+	end
+	if t%4<2 then
+		ship.fl=5
+		ship.fli=7
+	else
+		ship.fl=4
+		ship.fli=6
+	end
+	
+	if btn(4) then
+		if ftimer<=0 then
+			fire()
+			mksmoke()
+			sfx(1)
+			ftimer=frate
+		end	
+	end
+	ftimer-=1
+	if btnp(5) then
+		mkenemy()
+	end
+end
+
+function drplayer()
 	sprflash(ship)
 	spr(ship.sp,ship.x,ship.y)
 	pal()
@@ -227,16 +337,10 @@ function _draw()
 	else
 		spr(ship.fli,ship.x,ship.y+8)	
 	end
-	
-	--smokes
-	drsmokes(ship.x,ship.y)
-	--explosions
-	mkexplosions()
-	--debris
-	mkdebris()
-	
-	--ui
-	rectfill(0,0,126,8,0)
+end
+
+function drui()
+	rectfill(0,0,127,8,0)
 	--rect(0,0,127,8,6)
 	for i=1,4 do
 		spr(50,9*i,1)
@@ -250,24 +354,6 @@ function _draw()
 		print("score:"..score.."00",54,2,7)
 	end
 end
-
-function mkstars()
-	for i=1,50 do
-		local s={
-									x=rnd(128),
-									y=rnd(128),
-									sy=rnd(1)+1,
-									cl=flr(rnd(4)+7)}
-		if rnd()>0.15 then
-			s.cl=7
-		end
-		if s.sy<1.4 then
-			s.cl=13
-		end						
-		add(stars,s)							
-	end
-end
-
 
 function fire()
 	local b={
@@ -413,13 +499,15 @@ function mkdebris()
 	end
 end
 
-function ene_fire(_x,_y)
+function ene_fire(_x,_y,_ang,_spd)
+	local sx=sin(_ang)*_spd
+	local sy=cos(_ang)*_spd
 	local eb={
 								sp=32,
 								x=_x,
 								y=_y,
-								sx=0,
-								sy=2,
+								sx=sx,
+								sy=sy,
 								box={x1=2,y1=2,x2=6,y2=6}}
 	add(e_bullets,eb)
 end
@@ -475,6 +563,10 @@ function mkflash()
 		cls()
 	end
 end
+
+function cprint(txt,x,y,c)
+ print(txt,x-#txt*2,y,c)
+end
 __gfx__
 0000000000d61000000d60000001d600000170000009100000098000000800000000000000000000000000000000000000000000000000000000000000000000
 0000000001d61050501d61050501d6100087a800008a98000008000000008000000ee000000ee000000ee000000ee00000333300000000000000000000333300
@@ -485,7 +577,7 @@ __gfx__
 0000000006556610166556610166556000000000000000000000000000000000000ee000000ee000000ee000000ee00000000000039999300399993000000000
 000000000dadd10001daad10001ddad0000000000000000000000000000000000000000000000000000000000000000000000000000000000300003000000000
 0000000b0000000000000000000000000b000b00000000000000000000b000b008088080080880800808808008088080001122cccc221100001122cccc221100
-b00000b0b00000bbb00000b0000000bb0b000b00000000000000000000b000b000888800008888000088880000888800001122cccc221100001122cccc221100
+b00000b0b00000bbb00000b0000000bb0b000b00000000000000000000b000b000888800008888000088880000888800001122cccc221100011122cccc221110
 0bbbbb000bbbbb000bbbbb0b3bbbbb0000bbb0000b000b0000b000b0000bbb0008b88b800828828008b88b8008288280111ccc5555ccc111111ccc5555ccc111
 0b707b000b707b000b707b000b333b000bbbbb0000bbb000000bbb0000bbbbb088888888888888888888888888888888111cc57ee75cc11111ccc522225ccc11
 0bb66b000bb66b000bb66b000bb66b0001e61b000bbbbb0000bbbbb000b16e1080aaaa0880aaaa0880aaaa0880aaaa081ccccc7887ccccc11ccccc2222ccccc1
@@ -499,7 +591,7 @@ b00000000b00000000b000000b00000bb00000b0bbaaaab00baaaabb0b00000b0000000000000000
 000990000009900000b7fb000fb66bf0000000000000000000000000000000000000000000000000000000000000000011c0000000000c1101cc00000000cc11
 0000900000090000000bb00000fbbf00000000000000000000000000000000000000000000000000000000000000000001cc00000000cc10011c00000000c110
 009000000000090000000000000ff0000000000000000000000000000000000000000000000000000000000000000000011c00000000c110001ccc0000ccc100
-0000a000000a000000000000000000000000000000000000000000000000000000000000000000000000000000000000001ccc0000ccc1000000000000000000
+0000a000000a000000000000000000000000000000000000000000000000000000000000000000000000000000000000001ccc0000ccc1000001110000111000
 00000000007007000070070000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 00800800078778700767767000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 08888880788888877666666700000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
