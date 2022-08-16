@@ -31,7 +31,10 @@ function _init()
 	mkstars()
 	
 	shake=0
-	flash=0		
+	flash=0
+	ftimer=0
+	frate=5
+			
 end
 
 function _update()
@@ -78,12 +81,15 @@ function _update()
 		ship.fli=6
 	end
 	
-	if btnp(4) then
-		fire()
-		mksmoke()
-		sfx(1)
+	if btn(4) then
+		if ftimer<=0 then
+			fire()
+			mksmoke()
+			sfx(1)
+			ftimer=frate
+		end	
 	end
-	
+	ftimer-=1
 	if btnp(5) then
 		mkenemy()
 	end
@@ -230,6 +236,8 @@ function _draw()
 	mkdebris()
 	
 	--ui
+	rectfill(0,0,126,8,0)
+	--rect(0,0,127,8,6)
 	for i=1,4 do
 		spr(50,9*i,1)
 	end
@@ -445,7 +453,7 @@ function mkshake()
 		shake-=1
 		camera(s,0)
 	end
-	if shake<0 then
+	if shake<=0 then
 		shake=0
 		camera(0,0)
 	end
