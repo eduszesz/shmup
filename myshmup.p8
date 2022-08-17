@@ -9,6 +9,7 @@ function _init()
 	debug=""
 	state="start"
 	score=0
+	win=false
 	ship={
 		sp=2,
 		x=64,
@@ -97,7 +98,10 @@ function update_game()
 end
 
 function update_over()
-
+	if btnp(5) then
+		_init()
+		state="start"
+	end
 end
 
 function draw_start()
@@ -133,7 +137,19 @@ function draw_game()
 end
 
 function draw_over()
-
+		local cl=7
+	if t%16<8 then
+		cl=5
+	end
+	drstars()
+	cprint("press x/❎ to play again",63,64,1)
+	cprint("press x/❎ to play again",63,65,1)
+	cprint("press x/❎ to play again",64,64,cl)
+	if win then
+		sspr(2,81,52,6,15,10,100,20)
+	else	
+		sspr(1,65,29,14,25,10,80,40)
+	end
 end
 
 function mkstars()
@@ -217,9 +233,9 @@ end
 function dre_bullets()
 	for eb in all(e_bullets) do
 		if t%8<4 then
-			eb.sp=34
+			eb.sp=eb.spi
 		else
-			eb.sp=35
+			eb.sp=eb.spi+1
 		end
 		spr(eb.sp,eb.x,eb.y)
 	end
@@ -230,7 +246,7 @@ function upenemies()
 		if t%30==0 then	
 			if rnd()>0.5 then
 				e.imm=true	
-				ene_fire(e.x+(-4+4*e.wd),e.y+(4*e.ht))
+				ene_fire(e.x+(-4+4*e.wd),e.y+(4*e.ht),1,2,e.typ)
 			end
 		end	
 		e.y+=e.sy
@@ -334,6 +350,9 @@ function upplayer()
 	ftimer-=1
 	if btnp(5) then
 		mkenemy()
+	end
+	if ship.h<=0 then
+		state="over"
 	end
 end
 
@@ -509,13 +528,18 @@ function mkdebris()
 	end
 end
 
-function ene_fire(_x,_y,_ang,_spd)
+function ene_fire(_x,_y,_ang,_spd,_typ)
 	if _ang==nil then _ang=1 end
 	if _spd==nil then _spd=2 end
 	local sx=sin(_ang)*_spd
 	local sy=cos(_ang)*_spd
+	local sp=34
+	if _typ==20 then
+		sp=36
+	end 
 	local eb={
-								sp=32,
+								sp=sp,
+								spi=sp,
 								x=_x,
 								y=_y,
 								sx=sx,
