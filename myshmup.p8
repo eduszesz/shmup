@@ -257,10 +257,29 @@ function upenemies()
 	for e in all(enemies) do
 		if t%30==0 then	
 			if rnd()>0.5 then
-				e.imm=true	
-				ene_fire(e,1,2)
+				--e.imm=true	
+				--ene_fire(e,1,2)
 			end
 		end
+		
+		if e.typ==20 then
+			if e.y==ship.y then
+				e.sy=0
+				if t%15==0 then
+					e.imm=true	
+					ene_fire(e)
+				end
+			end
+			if e.y>ship.y then
+				e.sy=-0.5
+			end
+			if e.y<ship.y then
+				e.sy=0.5
+			end
+		end
+		
+		
+		e.x+=e.sx
 		e.y+=e.sy
 		if e.y>128 then
 			e.y=-10
