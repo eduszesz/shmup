@@ -37,7 +37,7 @@ function _init()
 	flash=0
 	ftimer=0
 	frate=5
-			
+	firetyp=1	
 end
 
 function _update()
@@ -94,7 +94,7 @@ function update_game()
 	
 	upplayer()
 		
-	immortal(ship,20)
+	immortal(ship,45)
 end
 
 function update_over()
@@ -182,6 +182,7 @@ end
 
 function upbullets()
 	for b in all(bullets) do
+		b.x+=b.sx
 		b.y+=b.sy
 		if b.y<-10 then
 			del(bullets,b)
@@ -206,12 +207,7 @@ function upe_bullets()
 		eb.y+=eb.sy
 		if coll(eb,ship) then
 			if not ship.imm then
-				ship.imm=true
-				shake=10
-				flash=10
-				fracture(ship.x+4,ship.y+4,"ship")
-				explode(ship.x+4,ship.y+4,2,10)
-				ship.h-=1
+				shipdmg()
 				del(e_bullets,eb)
 			end
 		end
@@ -241,13 +237,9 @@ function dre_bullets()
 			local x=ship.x
 			if eb.xi<x then x=128 end
 			if eb.xi>x then x=0 end
-			if t%4<2 then
-				rectfill(eb.xi,eb.yi-3,x,eb.yi+7,8)
-				rectfill(eb.xi,eb.yi-2,x,eb.yi+6,14)
-			end
-			rectfill(eb.xi,eb.yi-2,x,eb.yi+6,8)
-			rectfill(eb.xi,eb.yi-1,x,eb.yi+5,14)
-			rectfill(eb.xi,eb.yi,x,eb.yi+4,7)
+			rectfill(eb.xi,eb.yi+1,x,eb.yi+6,8)
+			rectfill(eb.xi,eb.yi+2,x,eb.yi+5,14)
+			rectfill(eb.xi,eb.yi+3,x,eb.yi+4,7)
 		end
 		spr(eb.sp,eb.x,eb.y)
 	end
@@ -255,60 +247,80 @@ end
 
 function upenemies()
 	for e in all(enemies) do
-		if t%30==0 then	
-			if rnd()>0.5 then
-				--e.imm=true	
-				--ene_fire(e,1,2)
+		if e.md=="fly" then
+			e.y+=(e.tgy-e.y)/4
+			if abs(e.y-e.tgy)<1 then
+				e.y=e.tgy
+				e.md="atk"
 			end
 		end
 		
-		if e.typ==20 then
-			if e.y==ship.y then
-				e.sy=0
-			end	
-			e.t+=1
-			if t%30==0 and e.sy==0 then
-				e.imm=true	
-				ene_fire(e)
+		if e.md=="atk"	then
+			if t%30==0 then	
+				if rnd()>0.5 then
+					--e.imm=true	
+					--ene_fire(e,1,2)
+				end
 			end
-			if e.t>90 then
-				e.t=0
+			
+			if e.typ==20 or e.typ==22 then
+				if e.y==ship.y then
+					e.sy=0
+					e.typ=22
+				end	
+				e.t+=1
+				if t%30==0 and e.sy==0 then
+					e.imm=true	
+					ene_fire(e)
+				end
+				if e.t>90 then
+					e.t=0
+				end
+				if e.y>ship.y and e.t==0 then
+					e.sy=-0.5
+					e.typ=20
+				end
+				if e.y<ship.y and e.t==0 then
+					e.sy=0.5
+					e.typ=20
+				end
 			end
-			if e.y>ship.y and e.t==0 then
-				e.sy=-0.5
+			
+			if e.typ==28 then
+				if abs(e.x-ship.x)<3 and
+				e.y<ship.y then
+					e.sx=0
+				end	
+				e.t+=1
+				if e.sx==0 and	e.y>8 then
+					e.sy=3
+				end
+				if e.t>30 then
+					e.t=0
+					e.sy=0.25
+				end
+				if e.x>ship.x and e.t==0 then
+					e.sx=-0.5
+				end
+				if e.x<ship.x and e.t==0 then
+					e.sx=0.5
+				end
 			end
-			if e.y<ship.y and e.t==0 then
-				e.sy=0.5
+			
+			e.x+=e.sx
+			e.y+=e.sy
+			if e.y>128 then
+				e.y=0
+				e.tgy=15
+				e.md="fly"
 			end
-		end
-		
-		if e.typ==28 then
-			if abs(e.x-ship.x)<3 and
-			e.y<ship.y then
-				e.sx=0
-			end	
-			e.t+=1
-			if e.sx==0 and	e.y>8 then
-				e.sy=3
-			end
-			if e.t>30 then
-				e.t=0
-				e.sy=0.25
-			end
-			if e.x>ship.x and e.t==0 then
-				e.sx=-0.5
-			end
-			if e.x<ship.x and e.t==0 then
-				e.sx=0.5
-			end
-		end
-		
-		e.x+=e.sx
-		e.y+=e.sy
-		if e.y>128 then
-			e.y=-10
 		end
 		immortal(e,10)
+		if coll(ship,e) and
+		not ship.imm then
+			shipdmg()		
+		end
+		
 	end
 	--collision enemies x bullets
 	for e in all(enemies) do
@@ -318,16 +330,22 @@ function upenemies()
 		for b in all(bullets) do
 			if coll(e,b) then
 				if not e.imm then
+					local x=e.sx
+					local y=e.sy
+					if e.typ==28 then
+						y=e.sy*5
+						x=e.sx*5
+					end
 					e.imm=true
 					e.h-=1
 					sfx(2)
-					fracture(ex,ey,e.typ)
-					explode(ex,ey,2,10*e.wd)
+					fracture(ex,ey+y/2,e.typ)
+					explode(ex+x,ey+y,2,10*e.wd)
 					del(bullets,b)
 					if e.h<1 then
-						explode(ex,ey,1,20*e.wd)
+						explode(ex,ey+y,1,20*e.wd)
 						sfx(3)
-						shake=1*e.wd
+						shake=3*e.wd
 						del(enemies,e)
 						score+=1*e.wd
 					end
@@ -342,11 +360,18 @@ function drenemies()
 		if t%(6*e.wd)==0 then
 			e.sp+=e.wd
 		end
-		if e.sp>(e.typ+3) then
+		if e.sp>(e.typ+e.ani) then
 			e.sp=e.typ
 		end
 		sprflash(e)
-		spr(e.sp,e.x,e.y,e.wd,e.ht)
+		if e.typ==22 then
+			if ship.x>e.x then
+				e.flp=true
+			else
+				e.flp=false
+			end
+		end
+		spr(e.sp,e.x,e.y,e.wd,e.ht,e.flp)
 		pal()
 	end
 end
@@ -396,7 +421,14 @@ function upplayer()
 	
 	if btn(4) then
 		if ftimer<=0 then
-			fire()
+			if firetyp>1 then
+				local spc=0.375/(firetyp*2)
+				for i=1,firetyp do
+					fire(0.375+spc*i,5)
+				end					
+			else
+				fire(0.5,5)
+			end	
 			mksmoke()
 			sfx(1)
 			ftimer=frate
@@ -439,13 +471,15 @@ function drui()
 	end
 end
 
-function fire()
+function fire(_ang,_spd)
+	local sx=sin(_ang)*_spd
+	local sy=cos(_ang)*_spd
 	local b={
 								sp=32,
 								x=ship.x,
 								y=ship.y-4,
-								sx=0,
-								sy=-5,
+								sx=sx,
+								sy=sy,
 								box={x1=2,y1=0,x2=6,y2=7}}
 	add(bullets,b)
 end
@@ -497,11 +531,13 @@ end
 
 function mkenemy()
 	local typ=rnd(e_types)
+	local tgx=rnd(100)+10
+	local tgy=30
 	local e={
 								sp=typ,
 								typ=typ,
-								x=rnd(100)+10,
-								y=0,
+								x=tgx,
+								y=-10,
 								sx=0,
 								sy=0.5,
 								h=5,
@@ -510,6 +546,11 @@ function mkenemy()
 								wd=1,
 								ht=1,
 								t=0,
+								flp=false,
+								ani=3,
+								md="fly",
+								tgx=tgx,
+								tgy=tgy,
 								box={x1=0,y1=0,x2=7,y2=7}}
 	if e.typ==28  then
 		e.wd=2
@@ -518,7 +559,9 @@ function mkenemy()
 		e.sx=0.25
 		e.box={x1=0,y1=0,x2=15,y2=15}
 	end
-	
+	if e.typ==20 then
+		e.ani=1
+	end
 	
 	add(enemies,e)							
 end
@@ -590,7 +633,7 @@ function ene_fire(_obj,_ang,_spd)
 	local sp=34
 	if _ang==nil then _ang=1 end
 	if _spd==nil then _spd=2 end
-	if o.typ==20 then
+	if o.typ==22 then
 		sp=36
 		_ang=0.25
 		_spd=6
@@ -670,6 +713,15 @@ end
 function cprint(txt,x,y,c)
  print(txt,x-#txt*2,y,c)
 end
+
+function shipdmg()
+	ship.imm=true
+	shake=10
+	flash=10
+	fracture(ship.x+4,ship.y+4,"ship")
+	explode(ship.x+4,ship.y+4,2,10)
+	ship.h-=1
+end 
 __gfx__
 0000000000d61000000d60000001d600000170000009100000098000000800000000000000000000000000000000000000000000000000000000000000000000
 0000000001d61050501d61050501d6100087a800008a98000008000000008000000ee000000ee000000ee000000ee00000333300000000000000000000333300
@@ -679,22 +731,22 @@ __gfx__
 0070070005765661665775661665675000000000000000000000000000000000008ccc0000c8cc0000cc8c0000ccc80000999900883333880833338003999930
 0000000006556610166556610166556000000000000000000000000000000000000ee000000ee000000ee000000ee00000000000039999300399993000000000
 000000000dadd10001daad10001ddad0000000000000000000000000000000000000000000000000000000000000000000000000000000000300003000000000
-0000000b0000000000000000000000000000000000000000003333000033330008088080080880800808808008088080001122cccc221100001122cccc221100
-b00000b0b00000bbb00000b0000000bb00bbbb0000bbbb00bb772200bb22770000888800008888000088880000888800001122cccc221100011122cccc221110
-0bbbbb000bbbbb000bbbbb0b3bbbbb0032bbbb2337bbbb73bbbbbbb0bbbbbbb008b88b800828828008b88b8008288280111ccc5555ccc111111ccc5555ccc111
-0b707b000b707b000b707b000b333b0032b11b2337b11b7300001bb000001bb088888888888888888888888888888888111cc57ee75cc11111ccc522225ccc11
-0bb66b000bb66b000bb66b000bb66b0037b00b7332b00b2300001bb000001bb080aaaa0880aaaa0880aaaa0880aaaa081ccccc7887ccccc11ccccc2222ccccc1
-00bbbbb000bbbbb000bbbbb000bbbbb037b00b7332b00b23bbbbbbb0bbbbbbb0800000080800008008000080800000081ccccc7887ccccc11ccccc2222ccccc1
-0b00000b0b00000b0b00000b0b00000b0bb00bb00bb00bb0bb772200bb227700080000800800008008800880888008881ccccc6006ccccc11ccccc6006ccccc1
-b00000000b00000000b000000b00000b0bb00bb00bb00bb00033330000333300000000000000000000000000000000001ccc09600690ccc11ccc09600690ccc1
-0009900000099000000000000000000000000000000000000000000000000000000000000000000000000000000000001ccc09000990ccc11ccc09900090ccc1
-009aa9000097790000000000000ff00088888888088888800000000000000000000000000000000000000000000000001cc0090000000cc11cc0000000900cc1
-0097a900009a7900000bb00000fbbf00eeeeeeee0eeeeee00000000000000000000000000000000000000000000000001cc0099000000cc11cc0000009900cc1
-00977900009aa90000b77b000fb66bf0777777770777777000000000000000000000000000000000000000000000000011c0000000000c1111c0000000000c11
-000990000009900000b7fb000fb66bf0777777770777777000000000000000000000000000000000000000000000000011c0000000000c1101cc00000000cc11
-0000900000090000000bb00000fbbf00eeeeeeee0eeeeee000000000000000000000000000000000000000000000000001cc00000000cc10011c00000000c110
-009000000000090000000000000ff0008888888808888880000000000000000000000000000000000000000000000000011c00000000c110001ccc0000ccc100
-0000a000000a000000000000000000000000000000000000000000000000000000000000000000000000000000000000001ccc0000ccc1000001110000111000
+0000000b00000000000000000000000003bbbb3003bbbb30000333300003333008088080080880800808808008088080001122cccc221100001122cccc221100
+b00000b0b00000bbb00000b0000000bb32bbbb2337bbbb73bbb77223bbb2277300888800008888000088880000888800001122cccc221100011122cccc221110
+0bbbbb000bbbbb000bbbbb0b3bbbbb0032b11b2337b11b73bbbbbbbbbbbbbbbb08b88b800828828008b88b8008288280111ccc5555ccc111111ccc5555ccc111
+0b707b000b707b000b707b000b333b0037b11b7332b11b235d1166bb56611dbb88888888888888888888888888888888111cc57ee75cc11111ccc522225ccc11
+0bb66b000bb66b000bb66b000bb66b0037b11b7332b11b235d1166bb56611dbb80aaaa0880aaaa0880aaaa0880aaaa081ccccc7887ccccc11ccccc2222ccccc1
+00bbbbb000bbbbb000bbbbb000bbbbb00bb11bb00bb11bb0bbbbbbbbbbbbbbbb800000080800008008000080800000081ccccc7887ccccc11ccccc2222ccccc1
+0b00000b0b00000b0b00000b0b00000b0bb11bb00bb11bb0bbb77223bbb22773080000800800008008800880888008881ccccc6006ccccc11ccccc6006ccccc1
+b00000000b00000000b000000b00000b0bb55bb00bb55bb00003333000033330000000000000000000000000000000001ccc09600690ccc11ccc09600690ccc1
+0009900000099000000000000000000008888880088888800000000000000000000000000000000000000000000000001ccc09000990ccc11ccc09900090ccc1
+009aa9000097790000000000000ff000eeeeeeee888888880000000000000000000000000000000000000000000000001cc0090000000cc11cc0000000900cc1
+0097a900009a7900000bb00000fbbf0077777777eeeeeeee0000000000000000000000000000000000000000000000001cc0099000000cc11cc0000009900cc1
+00977900009aa90000b77b000fb66bf0777777777777777700000000000000000000000000000000000000000000000011c0000000000c1111c0000000000c11
+000990000009900000b7fb000fb66bf0777777777777777700000000000000000000000000000000000000000000000011c0000000000c1101cc00000000cc11
+0000900000090000000bb00000fbbf0077777777eeeeeeee00000000000000000000000000000000000000000000000001cc00000000cc10011c00000000c110
+009000000000090000000000000ff000eeeeeeee88888888000000000000000000000000000000000000000000000000011c00000000c110001ccc0000ccc100
+0000a000000a000000000000000000000888888008888880000000000000000000000000000000000000000000000000001ccc0000ccc1000001110000111000
 00000000007007000070070000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 00800800078778700767767000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 08888880788888877666666700000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
