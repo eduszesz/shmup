@@ -6,6 +6,7 @@ __lua__
 
 function _init()
 	t=0
+	wtimer=90
 	debug=""
 	state="start"
 	score=0
@@ -13,7 +14,7 @@ function _init()
 	ship={
 		sp=2,
 		x=64,
-		y=64,
+		y=100,
 		sx=0,
 		sy=0,
 		fl=4,
@@ -21,6 +22,7 @@ function _init()
 		h=4,
 		imm=false,
 		age=0,
+		sh=true, --shield
 		box={x1=0,y1=0,x2=7,y2=7}}
 		
 	stars={}
@@ -55,7 +57,14 @@ function _update()
 		update_over()
 	end
 	
-
+	if state=="wave" then
+		update_game()
+		wtimer-=1
+		if wtimer<=0 then
+			wtimer=90
+			state="game"
+		end
+	end
 		
 end
 
@@ -74,6 +83,10 @@ function _draw()
 		draw_over()
 	end
 	
+	if state=="wave" then
+		draw_game()
+		draw_wave()
+	end
 	mkshake()
 	mkflash()
 	--print(debug,64,64,8)
@@ -81,7 +94,7 @@ end
 
 function update_start()
 	if btnp(5) then
-		state="game"
+		state="wave"
 	end
 end
 
@@ -150,6 +163,15 @@ function draw_over()
 	else	
 		sspr(1,65,29,14,25,10,80,40)
 	end
+end
+
+function draw_wave()
+	local cl=7
+	rect(0,60,127,72,11)
+	if t%16<8 then
+		cl=5
+	end
+	cprint("wave 1 of 6",64,64,cl)
 end
 
 function mkstars()
@@ -445,6 +467,9 @@ end
 
 function drplayer()
 	sprflash(ship)
+	if ship.sh then
+		circ(ship.x+4,ship.y+4,12,12)
+	end
 	spr(ship.sp,ship.x,ship.y)
 	pal()
 	if ship.sx!=0 or 
