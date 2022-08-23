@@ -6,7 +6,8 @@ __lua__
 
 function _init()
 	t=0
-	wtimer=90
+	wtimer=90 --wave timer
+	dtimer=30 --ship death timer
 	cwave=1
 	lwave=7
 	debug=""
@@ -29,15 +30,16 @@ function _init()
 		box={x1=0,y1=0,x2=7,y2=7}}
 		
 	shield={
-							x=ship.x-4,
-							y=ship.y-4,
+							x=ship.x,
+							y=ship.y,
 							t=300,
-							box={x1=0,y1=0,x2=11,y2=11}}	
+							box={x1=-6,y1=-6,x2=14,y2=14}}	
 	bonus={
 						x=rnd(100)+10,
 						y=-10,
 						sy=1,
 						age=0,
+						t=150,
 						imm=false,
 						box={x1=0,y1=0,x2=7,y2=7}}
 	stars={}
@@ -54,12 +56,23 @@ function _init()
 	flash=0
 	ftimer=0
 	frate=5
-	firetyp=1	
+	firetyp=1
+	
+	bonustyp={"shield on","1 up!","triple fire","multi fire","mega fire"}
+	
+	----------------------------
+	-- required for fade
+	dpal={0,1,1,2,1,13,6,4,4,9,3,13,1,13,14}
+	fadeperc=1
+	-----------------------------
+	--required for float
+	floats={}
+	
 end
 
 function _update()
 	t+=1
-	
+	checkfade()
 	if state=="start" then
 		update_start()
 	end
@@ -78,6 +91,16 @@ function _update()
 		if wtimer<=0 then
 			wtimer=90
 			state="game"
+		end
+	end
+	
+	if state=="died" then
+		update_game()
+		dtimer-=1
+		if dtimer<=0 then
+			dtimer=30
+			fadeout()
+			state="over"
 		end
 	end
 		
@@ -102,13 +125,19 @@ function _draw()
 		draw_game()
 		draw_wave()
 	end
+	
+	if state=="died" then
+		draw_game()
+	end
 	mkshake()
 	mkflash()
 	--print(debug,64,64,8)
+	--drcollbox(shield)
 end
 
 function update_start()
 	if btnp(5) then
+		fadeout()
 		state="wave"
 	end
 end
@@ -127,11 +156,14 @@ function update_game()
 	upplayer()
 		
 	immortal(ship,45)
+	
+	dofloats()
 end
 
 function update_over()
 	if btnp(5) then
 		_init()
+		fadeout()
 		state="start"
 	end
 end
@@ -166,6 +198,8 @@ function draw_game()
 	mkdebris()
 	
 	drbonus()
+	
+	drfloats()
 	
 	drui()
 end
@@ -213,13 +247,19 @@ function mkstars()
 end
 
 function drstars()
+	local spd=1
 	for s in all(stars) do
-		s.y+=s.sy
 		if s.y>128 then
 			s.y=-10
 			s.x=rnd(128)
 		end
-		pset(s.x,s.y,s.cl)
+		if state=="wave" then
+			spd=3
+			line(s.x,s.y,s.x,s.y+(wtimer/5),s.cl)
+		else
+			pset(s.x,s.y,s.cl)
+		end
+		s.y+=s.sy*spd
 	end
 end
 
@@ -257,6 +297,7 @@ function upe_bullets()
 		if coll(eb,shield) then
 			if ship.sh then
 				explode(eb.x,eb.y,1,5)
+				sfx(2)
 				del(e_bullets,eb)
 			end
 		end
@@ -305,10 +346,14 @@ function upenemies()
 		end
 		
 		if e.md=="atk"	then
+			if e.x<0 or e.x>128 then
+				del(enemies,e)
+			end
+			
 			if t%30==0 then	
 				if rnd()>0.5 then
-					--e.imm=true	
-					--ene_fire(e,1,2)
+					e.imm=true	
+					ene_fire(e,1,2)
 				end
 			end
 			
@@ -370,9 +415,11 @@ function upenemies()
 			shipdmg()		
 		end
 		if coll(e,shield) then
-			explode(e.x,e.y,1,5)
 			if ship.sh and not e.imm then
 				e.imm=true
+				explode(e.x+4,e.y+4,2,5)
+				fracture(e.x+4,e.y+4,e.typ)
+				sfx(2)
 				if e.x>ship.x then
 					e.x+=8
 				end
@@ -496,11 +543,11 @@ function upplayer()
 		end	
 	end
 	ftimer-=1
-	if btnp(5) then
+	if btnp(5) and state=="game" then
 		mkenemy()
 	end
 	if ship.h<=0 then
-		state="over"
+		state="died"
 	end
 end
 
@@ -735,6 +782,7 @@ function ene_fire(_obj,_ang,_spd)
 								sy=sy,
 								box={x1=2,y1=2,x2=6,y2=6}}
 	add(e_bullets,eb)
+	sfx(5)
 end
 
 function immortal(_o,_t)
@@ -803,8 +851,8 @@ function shipdmg()
 end
 
 function upshield()
-	shield.x=ship.x-4
-	shield.y=ship.y-4
+	shield.x=ship.x
+	shield.y=ship.y
 	if ship.sh then
 		shield.t-=1
 		if shield.t<=0 then
@@ -816,16 +864,45 @@ end
 function upbonus()
 	immortal(bonus,10)
 	bonus.y+=bonus.sy
+	bonus.t-=1
 	if bonus.y>128 then
 		bonus.y=-10
 	end
 	if coll(ship,bonus) then
 		if not bonus.imm then
-			explode(bonus.x,bonus.y,1,5)
+			local txt=rnd(bonustyp)
+			explode(bonus.x+4,bonus.y+4,2,20)
 			bonus.imm=true
 			bonus.y=-10
 			bonus.x=rnd(100)+10
+			sfx(4)
+			bonus.t=150
+			if txt=="shield on" then
+				ship.sh=true
+				shield.t=300
+			end	
+			if txt=="1 up!" then
+				if ship.h<4 then
+					ship.h+=1
+				else	
+					txt="triple fire"
+				end
+			end	
+			if txt=="triple fire" then
+				firetyp=2
+			end	
+			if txt=="multi fire" then
+				firetyp=4
+			end	
+			if txt=="mega fire" then
+				firetyp=6
+			end
+			addfloat(txt, ship.x+4, ship.y,7)
 		end
+	end
+	if bonus.t<0 then
+				firetyp=1
+				bonus.t=0
 	end
 end
 
@@ -836,6 +913,77 @@ function drbonus()
 	end
 	spr(sp,bonus.x,bonus.y)
 end
+
+function drcollbox(_o)
+	--bebug collisions
+	local xi=_o.x+_o.box.x1
+	local xf=_o.x+_o.box.x2
+	local yi=_o.y+_o.box.y1
+	local yf=_o.y+_o.box.y2
+	rect(xi,yi,xf,yf,7)
+end
+
+--functions from
+--porklike tutorial
+--by lazydevs
+
+function addfloat(_txt,_x,_y,_c)
+ add(floats,{txt=_txt,x=_x,y=_y,c=_c,ty=_y-10,t=0})
+end
+
+function dofloats()
+ for f in all(floats) do
+  f.y+=(f.ty-f.y)/10
+  f.t+=1
+  if f.t>60 then
+   del(floats,f)
+  end
+ end
+end
+
+function drfloats()
+	for f in all(floats) do
+		cprint(f.txt,f.x,f.y,f.c)
+	end
+end
+
+function dofade()
+ local p,kmax,col,k=flr(mid(0,fadeperc,1)*100)
+ for j=1,15 do
+  col = j
+  kmax=flr((p+(j*1.46))/22)
+  for k=1,kmax do
+   col=dpal[col]
+  end
+  pal(j,col,1)
+ end
+end
+
+function checkfade()
+ if fadeperc>0 then
+  fadeperc=max(fadeperc-0.04,0)
+  dofade()
+ end
+end
+
+function wait(_wait)
+ repeat
+  _wait-=1
+  flip()
+ until _wait<0
+end
+
+function fadeout(spd,_wait)
+ if (spd==nil) spd=0.04
+ if (_wait==nil) _wait=0
+ repeat
+  fadeperc=min(fadeperc+spd,1)
+  dofade()
+  flip()
+ until fadeperc==1
+ wait(_wait)
+end
+-- ---------------
 __gfx__
 0000000000d61000000d60000001d600000170000009100000098000000800000000000000000000000000000000000000000000000000000000000000000000
 0000000001d61050501d61050501d6100087a800008a98000008000000008000000ee000000ee000000ee000000ee00000333300000000000000000000333300
@@ -853,14 +1001,14 @@ b00000b0b00000bbb00000b0000000bb32bbbb2337bbbb73bbb77223bbb227730088880000888800
 00bbbbb000bbbbb000bbbbb000bbbbb00bb11bb00bb11bb0bbbbbbbbbbbbbbbb800000080800008008000080800000081ccccc7887ccccc11ccccc2222ccccc1
 0b00000b0b00000b0b00000b0b00000b0bb11bb00bb11bb0bbb77223bbb22773080000800800008008800880888008881ccccc6006ccccc11ccccc6006ccccc1
 b00000000b00000000b000000b00000b0bb55bb00bb55bb00003333000033330000000000000000000000000000000001ccc09600690ccc11ccc09600690ccc1
-0009900000099000000000000000000008888880088888800006600000066000001111000022220000000000000000001ccc09000990ccc11ccc09900090ccc1
-009aa9000097790000000000000ff000eeeeeeee88888888006666000066660001daad100269962000000000000000001cc0090000000cc11cc0000000900cc1
-0097a900009a7900000bb00000fbbf0077777777eeeeeeee006d86000068d6001daddad12696696200000000000000001cc0099000000cc11cc0000009900cc1
-00977900009aa90000b77b000fb66bf077777777777777770568d650056d86501ddddad126666962000000000000000011c0000000000c1111c0000000000c11
-000990000009900000b7fb000fb66bf07777777777777777056dd650056dd6501dddadd126669662000000000000000011c0000000000c1101cc00000000cc11
-0000900000090000000bb00000fbbf0077777777eeeeeeee05655650056556501dddddd126666662000000000000000001cc00000000cc10011c00000000c110
-009000000000090000000000000ff000eeeeeeee88888888665555666655556601ddad10026696200000000000000000011c00000000c110001ccc0000ccc100
-0000a000000a000000000000000000000888888008888880665aa566665aa56600111100002222000000000000000000001ccc0000ccc1000001110000111000
+000990000009900000000000000000000888888008888880000660000006600000aaaa00000a000000000000000000001ccc09000990ccc11ccc09900090ccc1
+009aa9000097790000000000000ff000eeeeeeee8888888800666600006666000aa1cc90000a1d0000000000000000001cc0090000000cc11cc0000000900cc1
+0097a900009a7900000bb00000fbbf0077777777eeeeeeee006d86000068d6007a1ca1c900071c0000000000000000001cc0099000000cc11cc0000009900cc1
+00977900009aa90000b77b000fb66bf077777777777777770568d650056d8650aaaaa1c9000a5d00000000000000000011c0000000000c1111c0000000000c11
+000990000009900000b7fb000fb66bf07777777777777777056dd650056dd650aaaa1ca4000a0c00000000000000000011c0000000000c1101cc00000000cc11
+0000900000090000000bb00000fbbf0077777777eeeeeeee0565565005655650aaaaaaa4000a0000000000000000000001cc00000000cc10011c00000000c110
+009000000000090000000000000ff000eeeeeeee8888888866555566665555660aaa1c40000a1c000000000000000000011c00000000c110001ccc0000ccc100
+0000a000000a000000000000000000000888888008888880665aa566665aa56600aaa400000a00000000000000000000001ccc0000ccc1000001110000111000
 00000000007007000070070000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 00800800078778700767767000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 08888880788888877666666700000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
@@ -929,3 +1077,5 @@ __sfx__
 19020000220001a0511701113021100310e0410b0410a051070510406102061020710000000501005000050000500005000050000500005000050000500005000050000500005000050000500005000050000500
 00020000106101a610126000c60000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 c80400002d636286162461622616206161b616196161661614616116160e6160e6160000500004000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+100500003f0163a016360162a0163b010000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+0104000016007100070c0370903705037040370303702037010370003700707007070070700707007070070700707007070070700707007070070700707007070070700707007070070700707007070070700707
