@@ -8,6 +8,7 @@ function _init()
 	t=0
 	wtimer=90 --wave timer
 	dtimer=30 --ship death timer
+	enec=1
 	cwave=1
 	lwave=3
 	debug=""
@@ -347,9 +348,19 @@ function dre_bullets()
 end
 
 function upenemies()
-	local picke=rnd(enemies)
+	--[[local picke=rnd(enemies)
 	if t%90==0 and picke.md=="wait" then
 		picke.md="fly"
+	end]]
+	
+	if t%90==0 then
+		enec+=1
+	end
+	if enec>#enemies then
+		enec=1
+	end
+	if enemies[enec].md=="wait" then
+		enemies[enec].md="fly"
 	end
 	for e in all(enemies) do	
 		if e.md=="fly" then
