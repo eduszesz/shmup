@@ -9,7 +9,7 @@ function _init()
 	wtimer=90 --wave timer
 	dtimer=30 --ship death timer
 	cwave=1
-	lwave=7
+	lwave=3
 	debug=""
 	state="start"
 	score=0
@@ -25,7 +25,7 @@ function _init()
 		h=4,
 		imm=false,
 		age=0,
-		sh=true, --shield
+		sh=false, --shield
 		sr=10, --shield radius
 		box={x1=0,y1=0,x2=7,y2=7}}
 		
@@ -41,7 +41,8 @@ function _init()
 						y=-10,
 						sy=1,
 						age=0,
-						t=150,
+						t=0,
+						typ=nil,
 						imm=false,
 						box={x1=0,y1=0,x2=7,y2=7}}
 	stars={}
@@ -152,14 +153,21 @@ function update_game()
 	upbullets()
 	
 	upe_bullets()
-		
-	upenemies()
+	if state=="game" then	
+		upenemies()
+	end	
 	
 	upplayer()
 		
 	immortal(ship,45)
 	
 	dofloats()
+	
+	checkwave()
+	if state=="wave" then
+		mkwave()
+	end
+	checkwin()
 end
 
 function update_over()
@@ -176,6 +184,7 @@ function draw_start()
 		cl=5
 	end
 	drstars()
+	cprint("untitle space game",64,32,11)
 	cprint("press x/❎ to start",63,64,1)
 	cprint("press x/❎ to start",63,65,1)
 	cprint("press x/❎ to start",64,64,cl)
@@ -269,7 +278,7 @@ function upbullets()
 	for b in all(bullets) do
 		b.x+=b.sx
 		b.y+=b.sy
-		if b.y<-10 then
+		if b.y<0 then
 			del(bullets,b)
 		end
 	end
@@ -338,7 +347,11 @@ function dre_bullets()
 end
 
 function upenemies()
-	for e in all(enemies) do
+	local picke=rnd(enemies)
+	if t%90==0 and picke.md=="wait" then
+		picke.md="fly"
+	end
+	for e in all(enemies) do	
 		if e.md=="fly" then
 			e.y+=(e.tgy-e.y)/4
 			if abs(e.y-e.tgy)<1 then
@@ -352,10 +365,10 @@ function upenemies()
 				del(enemies,e)
 			end
 			
-			if t%30==0 then	
-				if rnd()>0.5 then
-				--e.imm=true	
-				--	ene_fire(e,1,2)
+			if t%60==0 then	
+				if rnd()>0.8 then
+					e.imm=true	
+					ene_fire(e,1,2)
 				end
 			end
 			
@@ -435,7 +448,7 @@ function upenemies()
 			end
 			
 			if e.y>128 then
-				e.y=0
+				e.y=-100
 				e.tgy=15
 				e.md="fly"
 			end
@@ -575,7 +588,7 @@ function upplayer()
 	end
 	ftimer-=1
 	if btnp(5) and state=="game" then
-		mkenemy()
+		--mkenemy()
 	end
 	if ship.h<=0 then
 		state="died"
@@ -686,15 +699,15 @@ function coll(a,b)
  return true 
 end
 
-function mkenemy()
-	local typ=rnd(e_types)
-	local tgx=rnd(100)+10
-	local tgy=30
+function mkenemy(_typ,_tgx,_tgy)
+	local typ=_typ --rnd(e_typestg)
+	local tgx=_tgx --rnd(100)+10
+	local tgy=_tgy
 	local e={
 								sp=typ,
 								typ=typ,
 								x=tgx,
-								y=-10,
+								y=-100,
 								sx=0,
 								sy=0.5,
 								h=5,
@@ -706,7 +719,7 @@ function mkenemy()
 								flp=false,
 								ani=3,
 								f=rnd(), --phase
-								md="fly",
+								md="wait",
 								tgx=tgx,
 								tgy=tgy,
 								box={x1=0,y1=0,x2=7,y2=7}}
@@ -922,6 +935,7 @@ function upbonus()
 			if txt=="1 up!" then
 				if ship.h<4 then
 					ship.h+=1
+					bonus.t=0
 				else	
 					txt="triple fire"
 				end
@@ -935,6 +949,7 @@ function upbonus()
 			if txt=="mega fire" then
 				firetyp=6
 			end
+			bonus.typ=txt
 			addfloat(txt, ship.x+4, ship.y,7)
 		end
 	end
@@ -952,8 +967,61 @@ function drbonus()
 		if bonus.sp>(bonus.spi+3) then
 			bonus.sp=bonus.spi
 		end
-	
+	if bonus.typ!="shield on" then
+		line(126,128,126,128-(bonus.t),10)
+	end
 	spr(bonus.sp,bonus.x,bonus.y)
+end
+
+function checkwave()
+	if state=="game" then
+		if #enemies==0 then
+			cwave+=1
+			state="wave"
+		end
+	end
+end
+
+function mkwave()
+	if cwave==1 then
+		local lvl={{8,12,16,20,24},
+												{28,8,8,8,8}}
+		local size=#lvl[1]*#lvl
+		placeenemies(lvl,size)		
+	end
+	
+	if cwave==2 then
+		local lvl={{8,8,8,8,8},
+												{12,12,12,12,12},
+												{8,8,8,8,8}}
+		local size=#lvl[1]*#lvl
+		placeenemies(lvl,size)		
+	end
+	
+	if cwave==3 then
+		local lvl={{8,8,8,8,8},
+												{8,12,16,12,8}}
+		local size=#lvl[1]*#lvl
+		placeenemies(lvl,size)		
+	end
+end
+
+function placeenemies(_lvl,size)
+	local lvl=_lvl
+	for i=1,#lvl[1] do
+			for j=1, #lvl do
+				if #enemies<size then
+					mkenemy(lvl[j][i],i*22,15)
+				end
+			end
+		end	
+end
+
+function checkwin()
+	if cwave>lwave then
+		win=true
+		state="over"
+	end
 end
 
 function drcollbox(_o)
