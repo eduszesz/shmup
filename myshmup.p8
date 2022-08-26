@@ -236,11 +236,15 @@ end
 
 function draw_wave()
 	local cl=7
-	local txt="warping to the enemy zone "..cwave.." of "..lwave
+	local txt="warping to the enemy zone"
+	local txt1=cwave.." of "..lwave
 	if t%16<8 then
 		cl=5
 	end
+	cprint(txt,63,65,1)
 	cprint(txt,64,64,cl)
+	cprint(txt1,63,73,1)
+	cprint(txt1,64,72,cl)
 end
 
 function mkstars()
@@ -351,7 +355,7 @@ end
 
 function upenemies()
 	local picke=rnd(enemies)
-	if t%90==0 and picke.md=="wait" then
+	if t%30==0 and picke.md=="wait" then
 		picke.md="fly"
 	end
 	
@@ -374,7 +378,7 @@ function upenemies()
 			end
 			
 			if t%60==0 and e.typ==8 then	
-				if rnd()>0.95 then
+				if rnd()>0.85 then
 					e.imm=true	
 					ene_fire(e,1,2)
 				end
@@ -420,11 +424,11 @@ function upenemies()
 					e.t=0
 				end
 				if e.y>ship.y and e.t==0 then
-					e.sy=-0.5
+					e.sy=-1
 					e.typ=20
 				end
 				if e.y<ship.y and e.t==0 then
-					e.sy=0.5
+					e.sy=1
 					e.typ=20
 				end
 			end
@@ -433,9 +437,9 @@ function upenemies()
 				e.x=e.tgx+8*cos(e.f+t/100)
 				e.y=e.tgy+8*sin(e.f+t/100)
 				if t%90==0 then
-					local spc=0.25/(firetyp)
+					local spc=0.25/(3)
 					for i=0,3 do
-						ene_fire(e,0.375+spc*i,5)
+						ene_fire(e,0.375+spc*i,-3)
 					end
 				end
 			end
@@ -486,10 +490,10 @@ function upenemies()
 				fracture(e.x+4,e.y+4,e.typ)
 				sfx(2)
 				if e.x>ship.x then
-					e.x+=8
+					e.x+=10
 				end
 				if e.x<ship.x then
-					e.x-=8
+					e.x-=10
 				end
 				explode(e.x,e.y,1,5)
 			end
@@ -761,10 +765,12 @@ function mkenemy(_typ,_tgx,_tgy)
 	end
 	if e.typ==20 then
 		e.ani=1
+		e.sy=1
 	end
 	if e.typ==16 then
 		e.x=64
 		e.h=2
+		e.tgy=110
 	end
 	if e.typ==12 then
 		e.sx=-1
@@ -1029,6 +1035,7 @@ end
 function mkwave()
 	if cwave==1 then
 		local lvl={{8,8,8,8,8},
+												{8,8,8,8,8},
 												{8,8,8,8,8}}
 		local size=#lvl[1]*#lvl
 		placeenemies(lvl,size)		
@@ -1036,49 +1043,62 @@ function mkwave()
 	if cwave==2 then
 		local lvl={{8,8,8,8,8},
 												{12,12,12,12,12},
+												{12,12,12,12,12},
 												{8,8,8,8,8}}
 		local size=#lvl[1]*#lvl
 		placeenemies(lvl,size)		
 	end
 	if cwave==3 then
 		local lvl={{8,8,8,8,8},
+												{8,12,16,12,8},
+												{8,12,12,12,8},
 												{8,12,16,12,8}}
 		local size=#lvl[1]*#lvl
 		placeenemies(lvl,size)		
 	end
 	if cwave==4 then
 		local lvl={{8,8,8,8,8},
-												{20,8,8,8,20}}
+												{20,8,8,8,20},
+												{20,8,8,8,20},
+												{8,8,8,8,8}}
 		local size=#lvl[1]*#lvl
 		placeenemies(lvl,size)		
 	end
 	if cwave==5 then
 		local lvl={{8,24,8,24,8},
+												{24,8,8,8,24},
+												{8,8,8,8,8},
 												{12,24,8,24,12}}
 		local size=#lvl[1]*#lvl
 		placeenemies(lvl,size)		
 	end
 	if cwave==6 then
 		local lvl={{8,28,8,28,8},
-												{12,8,8,8,12}}
+												{12,8,8,8,12},
+												{12,8,28,8,12},
+												{28,8,8,8,12}}
 		local size=#lvl[1]*#lvl
 		placeenemies(lvl,size)		
 	end
 	if cwave==7 then
 		local lvl={{12,20,8,20,12},
-												{12,24,8,24,12}}
+												{20,24,8,24,20},
+												{24,24,8,24,24},
+												{12,8,8,8,12}}
 		local size=#lvl[1]*#lvl
 		placeenemies(lvl,size)		
 	end
 	if cwave==8 then
-		local lvl={{12,8,16,8,12},
+		local lvl={{12,8,28,8,12},
+												{8,24,16,24,8},
+												{8,12,28,12,8},
 												{8,24,16,24,8}}
 		local size=#lvl[1]*#lvl
 		placeenemies(lvl,size)		
 	end
 	if cwave==9 then
-		local lvl={{20,8,24,8,20},
-												{8,28,20,28,8}}
+		local lvl={{28,28,28,28,28},
+												{20,20,20,20,20}}
 		local size=#lvl[1]*#lvl
 		placeenemies(lvl,size)		
 	end
