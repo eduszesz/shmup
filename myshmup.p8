@@ -10,7 +10,7 @@ function _init()
 	dtimer=60 --ship death timer
 	enec=1
 	cwave=1
-	lwave=3
+	lwave=9
 	debug=""
 	state="start"
 	score=0
