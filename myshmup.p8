@@ -7,7 +7,7 @@ __lua__
 function _init()
 	t=0
 	wtimer=90 --wave timer
-	dtimer=30 --ship death timer
+	dtimer=60 --ship death timer
 	enec=1
 	cwave=1
 	lwave=3
@@ -15,6 +15,7 @@ function _init()
 	state="start"
 	score=0
 	win=false
+	give=true
 	ship={
 		sp=2,
 		x=64,
@@ -40,7 +41,7 @@ function _init()
 						spi=38,
 						x=rnd(100)+10,
 						y=-10,
-						sy=1,
+						sy=0,
 						age=0,
 						t=0,
 						typ=nil,
@@ -62,7 +63,7 @@ function _init()
 	frate=5
 	firetyp=1
 	
-	bonustyp={"shield on","1 up!","triple fire","multi fire","mega fire"}
+	bonustyp={"shield on","1 up!","triple fire","multi fire","mega fire","1 up!"}
 	
 	----------------------------
 	-- required for fade
@@ -90,6 +91,7 @@ function _update()
 	end
 	
 	if state=="wave" then
+		e_bullets={}
 		update_game()
 		wtimer-=1
 		if wtimer<=0 then
@@ -102,7 +104,7 @@ function _update()
 		update_game()
 		dtimer-=1
 		if dtimer<=0 then
-			dtimer=30
+			dtimer=60
 			fadeout()
 			state="over"
 		end
@@ -348,20 +350,12 @@ function dre_bullets()
 end
 
 function upenemies()
-	--[[local picke=rnd(enemies)
+	local picke=rnd(enemies)
 	if t%90==0 and picke.md=="wait" then
 		picke.md="fly"
-	end]]
+	end
 	
-	if t%90==0 then
-		enec+=1
-	end
-	if enec>#enemies then
-		enec=1
-	end
-	if enemies[enec].md=="wait" then
-		enemies[enec].md="fly"
-	end
+	
 	for e in all(enemies) do	
 		if e.md=="fly" then
 			e.y+=(e.tgy-e.y)/4
@@ -383,16 +377,6 @@ function upenemies()
 				end
 			end
 			
-			if e.typ==16 then
-				e.x=64+50*cos(e.f+t/100)
-				e.y=68+50*sin(e.f+t/100)
-				if t%60==0 then
-					local a=atan2(68-e.y,64-e.x)
-					e.imm=true
-					ene_fire(e,a,2)
-				end
-			end
-			
 			if e.typ==12 then
 				if e.x>120 then
 					e.sx=-1
@@ -406,6 +390,16 @@ function upenemies()
 				rnd()>0.7 then
 					e.imm=true	
 					ene_fire(e,1,2)
+				end
+			end
+			
+			if e.typ==16 then
+				e.x=64+50*cos(e.f+t/100)
+				e.y=68+50*sin(e.f+t/100)
+				if t%60==0 then
+					local a=atan2(68-e.y,64-e.x)
+					e.imm=true
+					ene_fire(e,a,2)
 				end
 			end
 			
@@ -432,6 +426,11 @@ function upenemies()
 				end
 			end
 			
+			if e.typ==24 then
+				e.x=e.tgx+8*cos(e.f+t/100)
+				e.y=e.tgy+8*sin(e.f+t/100)
+			end
+			
 			if e.typ==28 then
 				if abs(e.x-ship.x)<3 and
 				e.y<ship.y then
@@ -453,7 +452,9 @@ function upenemies()
 				end
 			end
 			
-			if e.typ!=16 then
+			if e.typ==8 or e.typ==12 or
+			 e.typ==20 or e.typ==22 or
+			 e.typ==28 then
 				e.x+=e.sx
 				e.y+=e.sy
 			end
@@ -602,6 +603,10 @@ function upplayer()
 		--mkenemy()
 	end
 	if ship.h<=0 then
+		explode(ship.x+4,ship.y+4,2,20)
+		fracture(ship.x+4,ship.y+4,"ship")
+		shake=5
+		sfx(3)
 		state="died"
 	end
 end
@@ -740,6 +745,9 @@ function mkenemy(_typ,_tgx,_tgy)
 		e.sy=0.25
 		e.sx=0.25
 		e.box={x1=0,y1=0,x2=15,y2=15}
+	end
+	if e.typ==24 then
+		e.tgy=30
 	end
 	if e.typ==20 then
 		e.ani=1
@@ -910,6 +918,7 @@ function shipdmg()
 	fracture(ship.x+4,ship.y+4,"ship")
 	explode(ship.x+4,ship.y+4,2,10)
 	ship.h-=1
+	sfx(2)
 end
 
 function upshield()
@@ -924,11 +933,18 @@ function upshield()
 end
 
 function upbonus()
+	if score%7==0 and score!=0
+		and give then
+		bonus.sy=1
+		give=false
+	end
+	
 	immortal(bonus,10)
 	bonus.y+=bonus.sy
 	bonus.t-=1
 	if bonus.y>128 then
 		bonus.y=-10
+		bonus.sy=0
 	end
 	if coll(ship,bonus) then
 		if not bonus.imm then
@@ -936,9 +952,11 @@ function upbonus()
 			explode(bonus.x+4,bonus.y+4,2,20)
 			bonus.imm=true
 			bonus.y=-10
+			bonus.sy=0
 			bonus.x=rnd(100)+10
 			sfx(4)
 			bonus.t=150
+			score+=1
 			if txt=="shield on" then
 				ship.sh=true
 				shield.t=300
@@ -946,7 +964,6 @@ function upbonus()
 			if txt=="1 up!" then
 				if ship.h<4 then
 					ship.h+=1
-					bonus.t=0
 				else	
 					txt="triple fire"
 				end
@@ -967,6 +984,7 @@ function upbonus()
 	if bonus.t<0 then
 				firetyp=1
 				bonus.t=0
+				give=true
 	end
 end
 
@@ -978,7 +996,7 @@ function drbonus()
 		if bonus.sp>(bonus.spi+3) then
 			bonus.sp=bonus.spi
 		end
-	if bonus.typ!="shield on" then
+	if firetyp>1 then
 		line(126,128,126,128-(bonus.t),10)
 	end
 	spr(bonus.sp,bonus.x,bonus.y)
@@ -995,8 +1013,8 @@ end
 
 function mkwave()
 	if cwave==1 then
-		local lvl={{8,12,16,20,24},
-												{28,8,8,8,8}}
+		local lvl={{24,24,24,24,24},
+												{8,8,8,8,8}}
 		local size=#lvl[1]*#lvl
 		placeenemies(lvl,size)		
 	end
