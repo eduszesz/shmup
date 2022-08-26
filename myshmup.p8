@@ -236,7 +236,7 @@ end
 
 function draw_wave()
 	local cl=7
-	local txt="wave "..cwave.." of "..lwave
+	local txt="warping to the enemy zone "..cwave.." of "..lwave
 	if t%16<8 then
 		cl=5
 	end
@@ -435,7 +435,7 @@ function upenemies()
 				if t%90==0 then
 					local spc=0.25/(firetyp)
 					for i=0,3 do
-						fire(e,0.375+spc*i,5)
+						ene_fire(e,0.375+spc*i,5)
 					end
 				end
 			end
@@ -1098,7 +1098,6 @@ end
 function checkwin()
 	if cwave>lwave then
 		win=true
-		fadeout()
 		state="over"
 	end
 end
