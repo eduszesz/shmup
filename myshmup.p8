@@ -361,6 +361,9 @@ function upenemies()
 			e.y+=(e.tgy-e.y)/4
 			if abs(e.y-e.tgy)<1 then
 				e.y=e.tgy
+				if e.typ==16 then
+					explode(e.x+4,e.y+4,2,5)
+				end
 				e.md="atk"
 			end
 		end
@@ -370,8 +373,8 @@ function upenemies()
 				del(enemies,e)
 			end
 			
-			if t%60==0 then	
-				if rnd()>0.8 then
+			if t%60==0 and e.typ==8 then	
+				if rnd()>0.95 then
 					e.imm=true	
 					ene_fire(e,1,2)
 				end
@@ -429,6 +432,12 @@ function upenemies()
 			if e.typ==24 then
 				e.x=e.tgx+8*cos(e.f+t/100)
 				e.y=e.tgy+8*sin(e.f+t/100)
+				if t%90==0 then
+					local spc=0.25/(firetyp)
+					for i=0,3 do
+						fire(e,0.375+spc*i,5)
+					end
+				end
 			end
 			
 			if e.typ==28 then
@@ -748,16 +757,22 @@ function mkenemy(_typ,_tgx,_tgy)
 	end
 	if e.typ==24 then
 		e.tgy=30
+		e.h=3
 	end
 	if e.typ==20 then
 		e.ani=1
 	end
 	if e.typ==16 then
 		e.x=64
+		e.h=2
 	end
 	if e.typ==12 then
 		e.sx=-1
 		e.sy=0
+		e.h=3
+	end
+	if e.typ==8 then
+		e.h=2
 	end
 	add(enemies,e)							
 end
@@ -1013,12 +1028,11 @@ end
 
 function mkwave()
 	if cwave==1 then
-		local lvl={{24,24,24,24,24},
+		local lvl={{8,8,8,8,8},
 												{8,8,8,8,8}}
 		local size=#lvl[1]*#lvl
 		placeenemies(lvl,size)		
 	end
-	
 	if cwave==2 then
 		local lvl={{8,8,8,8,8},
 												{12,12,12,12,12},
@@ -1026,10 +1040,45 @@ function mkwave()
 		local size=#lvl[1]*#lvl
 		placeenemies(lvl,size)		
 	end
-	
 	if cwave==3 then
 		local lvl={{8,8,8,8,8},
 												{8,12,16,12,8}}
+		local size=#lvl[1]*#lvl
+		placeenemies(lvl,size)		
+	end
+	if cwave==4 then
+		local lvl={{8,8,8,8,8},
+												{20,8,8,8,20}}
+		local size=#lvl[1]*#lvl
+		placeenemies(lvl,size)		
+	end
+	if cwave==5 then
+		local lvl={{8,24,8,24,8},
+												{12,24,8,24,12}}
+		local size=#lvl[1]*#lvl
+		placeenemies(lvl,size)		
+	end
+	if cwave==6 then
+		local lvl={{8,28,8,28,8},
+												{12,8,8,8,12}}
+		local size=#lvl[1]*#lvl
+		placeenemies(lvl,size)		
+	end
+	if cwave==7 then
+		local lvl={{12,20,8,20,12},
+												{12,24,8,24,12}}
+		local size=#lvl[1]*#lvl
+		placeenemies(lvl,size)		
+	end
+	if cwave==8 then
+		local lvl={{12,8,16,8,12},
+												{8,24,16,24,8}}
+		local size=#lvl[1]*#lvl
+		placeenemies(lvl,size)		
+	end
+	if cwave==9 then
+		local lvl={{20,8,24,8,20},
+												{8,28,20,28,8}}
 		local size=#lvl[1]*#lvl
 		placeenemies(lvl,size)		
 	end
@@ -1049,6 +1098,7 @@ end
 function checkwin()
 	if cwave>lwave then
 		win=true
+		fadeout()
 		state="over"
 	end
 end
