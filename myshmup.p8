@@ -8,7 +8,7 @@ function _init()
 	t=0
 	wtimer=90 --wave timer
 	dtimer=60 --ship death timer
-	enec=1
+	enc=1
 	cwave=1
 	lwave=9
 	debug=""
@@ -193,7 +193,7 @@ function draw_start()
 	cprint("press x/❎ to start",63,64,1)
 	cprint("press x/❎ to start",63,65,1)
 	cprint("press x/❎ to start",64,64,cl)
-	print("v0.35",100,120,1)
+	print("v0.36",100,120,1)
 end
 
 function draw_game()
@@ -362,7 +362,6 @@ function upenemies()
 		picke.md="fly"
 	end
 	
-	
 	for e in all(enemies) do	
 		if e.md=="fly" then
 			e.y+=(e.tgy-e.y)/4
@@ -404,8 +403,8 @@ function upenemies()
 			end
 			
 			if e.typ==16 then
-				e.x=64+50*cos(e.f+t/100)
-				e.y=68+50*sin(e.f+t/100)
+				e.x=64+40*cos(e.f+t/100)
+				e.y=68+40*sin(e.f+t/100)
 				if t%60==0 then
 					local a=atan2(68-e.y,64-e.x)
 					e.imm=true
@@ -476,8 +475,8 @@ function upenemies()
 			end
 			
 			if e.y>128 then
-				e.y=-100
-				e.tgy=15
+				e.y=-15
+				--e.tgy=15
 				e.md="fly"
 			end
 		end
@@ -1103,7 +1102,7 @@ function mkwave()
 	end
 	if cwave==4 then
 		local lvl={{8,8,8,8,8},
-												{20,8,8,8,20},
+												{12,8,8,8,12},
 												{20,8,8,8,20},
 												{8,8,8,8,8}}
 		local size=#lvl[1]*#lvl
@@ -1111,7 +1110,7 @@ function mkwave()
 	end
 	if cwave==5 then
 		local lvl={{8,24,8,24,8},
-												{24,8,8,8,24},
+												{8,8,8,8,8},
 												{8,8,8,8,8},
 												{12,24,8,24,12}}
 		local size=#lvl[1]*#lvl
@@ -1128,8 +1127,8 @@ function mkwave()
 	if cwave==7 then
 		local lvl={{12,20,8,20,12},
 												{20,24,8,24,20},
-												{24,24,8,24,24},
-												{12,8,8,8,12}}
+												{8,8,8,8,8},
+												{12,24,8,24,12}}
 		local size=#lvl[1]*#lvl
 		placeenemies(lvl,size)		
 	end
@@ -1151,18 +1150,14 @@ end
 
 function placeenemies(_lvl,size)
 	local lvl=_lvl
-	for i=1,#lvl[1] do
-			for j=1, #lvl do
+	for j=1,#lvl do
+			for i=1, #lvl[1] do
 				if #enemies<size then
 					local dx=0
-					local dy=0
 					if j%2==0 then
 						dx=8
 					end
-					if i%2==0 then
-						dy=8
-					end
-					mkenemy(lvl[j][i],dx+i*22,15+dy)
+					mkenemy(lvl[j][i],dx+i*22,6+j*9)
 				end
 			end
 		end	
