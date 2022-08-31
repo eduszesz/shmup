@@ -9,7 +9,7 @@ function _init()
 	wtimer=90 --wave timer
 	dtimer=60 --ship death timer
 	bdtimer=150 --boss death timer
-	cwave=9
+	cwave=1
 	lwave=9
 	debug=""
 	state="start"
@@ -118,7 +118,7 @@ function _update()
 		update_game()
 		bdtimer-=1
 		if bdtimer==60 then
-			explode(e.x+32,e.y+32,1,40)
+			explode(e.x+16,e.y+16,1,40)
 			fracture(e.x+16,e.y+16,e.typ)
 		end
 		if bdtimer<=0 then
@@ -179,7 +179,9 @@ function update_game()
 	
 	upbullets()
 	
-	upe_bullets()
+	if state=="game" then
+		upe_bullets()
+	end
 	if state=="game" or state=="bdied" then	
 		upenemies()
 	end	
@@ -215,16 +217,16 @@ function draw_start()
 	cprint("press x/❎ to start",63,64,1)
 	cprint("press x/❎ to start",63,65,1)
 	cprint("press x/❎ to start",64,64,cl)
-	print("v0.43",100,120,1)
+	print("v0.44",100,120,1)
 end
 
 function draw_game()
 	drstars()
 		
 	drbullets()
-	
-	dre_bullets()
-	
+	if state=="game" then
+		dre_bullets()
+	end
 	drenemies()
 	
 	drplayer()
