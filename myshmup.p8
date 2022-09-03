@@ -9,7 +9,7 @@ function _init()
 	wtimer=90 --wave timer
 	dtimer=60 --ship death timer
 	bdtimer=150 --boss death timer
-	cwave=1
+	cwave=9
 	lwave=9
 	debug=""
 	state="start"
@@ -233,7 +233,7 @@ function draw_start()
 	cprint("press x/❎ to start",63,104,1)
 	cprint("press x/❎ to start",63,105,1)
 	cprint("press x/❎ to start",64,104,cl)
-	print("v0.48",100,120,1)
+	print("v0.49",100,120,1)
 end
 
 function draw_game()
@@ -427,7 +427,7 @@ function upenemies()
 		end
 		
 		if e.md=="atk"	then
-			if e.x<0 or e.x>126 then
+			if e.x<0 or e.x>124 then
 				del(enemies,e)
 			end
 			
@@ -542,7 +542,7 @@ function upenemies()
 				end
 				e.x+=e.sx
 				e.y+=e.sy
-				if t%10==0 then
+				if t%5==0 then
 					ene_fire(e,1,2)
 				end
 			end
@@ -559,10 +559,10 @@ function upenemies()
 				end
 				e.x+=e.sx
 				e.y+=e.sy
-				if t%10==0 then	
+				if t%20==0 then	
 					ene_fire(e,1,2)
 				end
-				if e.y>96 and e.x==64 then
+				if e.y>96 and abs(e.x-64)<5 then
 					e.bmd="atk3"
 				end
 			end
@@ -575,8 +575,8 @@ function upenemies()
 					dy=3
 				end
 				if t%90==0 then
-					local spc=0.25/(6)
-					for i=0,6 do
+					local spc=1/9
+					for i=0,9 do
 						ene_fire(e,0.375+spc*i,dy)
 					end
 				end
@@ -636,8 +636,8 @@ function upenemies()
 				if e.x<ship.x and e.t==0 then
 					e.sx=1
 				end
-				if e.y<1 then e.sx=1 end
-				if e.y>96 then e.sx=-1 end
+				if e.x<8 then e.sx=1 end
+				if e.x>96 then e.sx=-1 end
 				e.x+=e.sx
 				e.y+=e.sy
 				e.bt+=1
@@ -1001,7 +1001,7 @@ function mkenemy(_typ,_tgx,_tgy)
 		e.wd=4
 		e.ht=4
 		e.ani=12
-		e.h=6
+		e.h=60
 		e.sy=0.25
 		e.sx=0.25
 		e.tgy=40
@@ -1275,6 +1275,7 @@ function upbonus()
 			end	
 			if txt=="bullet barrage" then
 				firetyp=6
+				bonus.t=250
 			end
 			bonus.typ=txt
 			addfloat(txt,64,120,1)
@@ -1460,7 +1461,7 @@ function drfloats()
 		local cl=f.c
 		if f.typ==2 then
 			if t%6<3 then
-				cl=14
+				cl=11
 			end
 		end
 		cprint(f.txt,f.x,f.y,cl)
