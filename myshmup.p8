@@ -12,6 +12,7 @@ function _init()
 end
 
 function initialize()
+	ver="0.53"
 	music(1)
 	t=0
 	newhighscore=false
@@ -275,7 +276,7 @@ function draw_start()
 		cprint("high score:"..highscore.."00",63,110,1)
 		cprint("high score:"..highscore.."00",64,111,9)
 	end
-	print("v0.52",100,120,1)
+	print(ver,100,120,1)
 	print("by eduardo szesz",0,120,1)
 end
 
@@ -1310,6 +1311,7 @@ function upbonus()
 	if bonus.y>128 then
 		bonus.y=-10
 		bonus.sy=0
+		give=true
 	end
 	if coll(ship,bonus) and state!="died" then
 		if not bonus.imm then
@@ -1352,7 +1354,6 @@ function upbonus()
 			if txt=="drone strike" then
 				bonus.t=70
 				drone.sy=-2
-				--bonus.use=true
 			end
 			bonus.typ=txt
 			addfloat(txt,64,120,1)
