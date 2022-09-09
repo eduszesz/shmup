@@ -12,7 +12,7 @@ function _init()
 end
 
 function initialize()
-	ver="v0.57"
+	ver="v1.0"
 	music(1)
 	t=0
 	newhighscore=false
