@@ -223,7 +223,7 @@ function update_start()
 		sfx(7)
 		fadeout()
 		bullets={}
-		music(21,10000)
+		music(21,10000,8)
 		state="wave"
 	end
 end
@@ -300,8 +300,6 @@ function draw_game()
 	drenemies()
 	
 	drbonus()
-	
-	drheat()
 	
 	drfloats()
 	
@@ -925,15 +923,13 @@ function upplayer()
 	if btnp(5) and not bonus.use then
 		if firetyp>1 or bonus.typ=="drone strike" then
 			sfx(31)
-			frate=5
 		else
 			sfx(30)
 		end
 		bonus.use=true
 	end
 			
-	if btn(4) and frate<16
-	 and state!="died" then
+	if btn(4) and state!="died" then
 		if ftimer<=0 then
 			if firetyp>1 and bonus.use then
 				local spc=0.25/(firetyp)
@@ -947,16 +943,10 @@ function upplayer()
 			sfx(1)
 			ftimer=frate
 		end
-		if t%45==0 and not bonus.use then
-			frate+=1
-		end
+		
 	end
 	ftimer-=1
-	if btn(4)==false then
-		if t%5==0 then
-			frate-=1
-		end
-	end
+	
 	if frate<5 then
 		frate=5
 	end
@@ -1004,21 +994,8 @@ function drplayer()
 			spr(ship.fli,ship.x,ship.y+8)	
 		end
 	end	
-	if state=="wave" then
-		
+	if state=="wave" then	
 		spr(ship.flw,ship.x,ship.y+8)
-		
-	end
-end
-
-function drheat()
-	if frate>9 then
-		local cl=8
-		if t%8<4 then
-			cl=14
-		end
-		print("overheating",2,121,1)
-		print("overheating",3,120,cl)
 	end
 end
 
@@ -1035,8 +1012,6 @@ function drui()
 	else
 		print("score:"..score.."00",54,2,7)
 	end
-	
-	line(0,128,0,188-frate*12,8)
 end
 
 function fire(_ang,_spd,_obj)
@@ -1354,7 +1329,7 @@ end
 function upshield()
 	shield.x=ship.x
 	shield.y=ship.y
-	if ship.sh then
+	if ship.sh and state!="wave" then
 		shield.t-=1
 		if shield.t<=0 then
 			ship.sh=false
