@@ -507,6 +507,9 @@ function upenemies()
 		end
 		
 		if e.md=="wait1" then
+			if t%5==0 then
+				ene_fire(e,1,2)
+			end
 			local ey=68+40*sin(e.f+t/120)
 			e.x=64+2*cos(tt)
 			if abs(e.y-ey)<1 then
@@ -789,7 +792,8 @@ function upenemies()
 		local ey=e.y+(4*e.ht)
 		
 		for b in all(bullets) do
-			if coll(e,b) and e.md=="atk" then
+			if coll(e,b) and
+				(e.md=="atk" or e.md=="wait1") then
 				if not e.imm then
 					local x=e.sx
 					local y=e.sy
