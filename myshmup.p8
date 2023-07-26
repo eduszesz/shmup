@@ -117,6 +117,7 @@ function _update()
 	end
 	
 	if state=="wave" then
+		shake=2
 		if wtimer==85 and cwave<10 then
 			sfx(9)
 		end
