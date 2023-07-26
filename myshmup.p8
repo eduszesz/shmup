@@ -1,5 +1,5 @@
 pico-8 cartridge // http://www.pico-8.com
-version 38
+version 41
 __lua__
 --simple shooter-bullet barrage
 --by eduszesz
@@ -18,6 +18,7 @@ function initialize()
 	tt=0
 	newhighscore=false
 	wtimer=90 --wave timer
+	wst=0 --wave star timer
 	dtimer=60 --ship death timer
 	bdtimer=150 --boss death timer
 	cwave=1
@@ -125,6 +126,10 @@ function _update()
 			music(7,300)
 		end
 		wtimer-=1
+		wst+=1
+		if wst>44 then
+			wst=0
+		end
 		if wtimer<=0 then
 			wtimer=90
 			if cwave>9 and
@@ -387,7 +392,11 @@ function drstars()
 		end
 		if state=="wave" then
 			spd=3
-			line(s.x,s.y,s.x,s.y+(wtimer/5),s.cl)
+			if wtimer>45 then
+				line(s.x,s.y,s.x,s.y+(wst/2),s.cl)
+			else
+				line(s.x,s.y,s.x,s.y+(wtimer/2),s.cl)
+			end
 		else
 			pset(s.x,s.y,s.cl)
 		end
