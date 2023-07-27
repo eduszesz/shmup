@@ -117,7 +117,6 @@ function _update()
 	end
 	
 	if state=="wave" then
-		shake=2
 		if wtimer==85 and cwave<10 then
 			sfx(9)
 		end
@@ -139,6 +138,7 @@ function _update()
 				state="over"
 			else
 				state="game"
+				shake=10
 			end
 		end
 	end
@@ -533,6 +533,9 @@ function upenemies()
 		if e.md=="atk"	then
 			if e.x<0 or e.x>124 then
 				del(enemies,e)
+				score+=3*e.wd
+				addfloat("shield kill bonus",64,120,1)
+				addfloat("shield kill bonus",63,121,7,2)
 			end
 			
 			if t%60==0 and e.typ==8 then	
@@ -1466,6 +1469,7 @@ function checkwave()
 		 and not win then
 			cwave+=1
 			state="wave"
+			shake=10
 		end
 	end
 end
