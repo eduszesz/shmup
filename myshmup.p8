@@ -88,7 +88,7 @@ function initialize()
 	frate=5
 	firetyp=1
 	
-	bonustyp={"drone strike","drone strike","shield on","1 up!","triple shooting","1 up!","bullet barrage","multi shooting","1 up!","shield on","1 up!","1 up!"}
+	bonustyp={"shield on"}--"drone strike","drone strike","shield on","1 up!","triple shooting","1 up!","bullet barrage","multi shooting","1 up!","shield on","1 up!","1 up!"}
 	
 	----------------------------
 	-- required for fade
@@ -224,6 +224,7 @@ function update_start()
 	
 	upbullets()
 	
+	upplayer()
 	
 	if btnp(5) then
 		music(-1)
@@ -232,6 +233,8 @@ function update_start()
 		bullets={}
 		music(21,10000,8)
 		state="wave"
+		ship.x=64
+		ship.y=80
 	end
 end
 
@@ -278,6 +281,7 @@ function update_over()
 end
 
 function draw_start()
+	
 	drbullets()
 	drsmokes(ship.x,ship.y)
 	local cl=7
@@ -295,6 +299,7 @@ function draw_start()
 	end
 	print(ver,100,120,1)
 	print("by eduardo szesz",0,120,1)
+	drplayer()
 end
 
 function draw_game()
@@ -534,10 +539,11 @@ function upenemies()
 		if e.md=="atk"	then
 			if e.x<0 or e.x>124 then
 				shake=5
+				sfx(3)
 				del(enemies,e)
 				score+=3*e.wd
-				addfloat("shield kill bonus",64,120,1)
-				addfloat("shield kill bonus",63,121,7,2)
+				addfloat("shield killing bonus",64,120,1)
+				addfloat("shield killing bonus",63,121,7,2)
 			end
 			
 			if t%60==0 and e.typ==8 then	
@@ -1002,6 +1008,7 @@ function drplayer()
 			i=3
 		end
 		circ(ship.x+4,ship.y+4,ship.sr+i,cl[i])
+		circ(ship.x+4,ship.y+4,ship.sr+i+2,cl[i])
 	end
 	spr(ship.sp,ship.x,ship.y)
 	pal()
@@ -1668,12 +1675,12 @@ function drlogo()
 	end
 	
 	sspr(1,112,121,16,4,36)
-	spr(2,64,80)
+	--[[spr(2,64,80)
 	if t%6<3 then
 		spr(4,64,88)
 	else
 		spr(5,64,88)
-	end
+	end]]
 end
 
 function updrone()
