@@ -13,6 +13,7 @@ end
 
 function initialize()
 	ver="v1.2"
+	cheats=0
 	music(1)
 	t=0
 	tt=0
@@ -89,7 +90,7 @@ function initialize()
 	firetyp=1
 	
 	bonustyp={"drone strike","drone strike","shield on","1 up!","triple shooting","1 up!","bullet barrage","multi shooting","1 up!","shield on","1 up!","1 up!"}
-	
+	bcheats={"drone strike","shield on","1 up!","triple shooting","bullet barrage","multi shooting"}
 	----------------------------
 	-- required for fade
 	dpal={0,1,1,2,1,13,6,4,4,9,3,13,1,13,14}
@@ -215,6 +216,10 @@ end
 
 function update_start()
 	local spc=0.25/(6)
+	if btnp(4) then
+		cheats+=1
+	end
+	if cheats>10 then cheats=0 end
 	if t%7==0 then
 		for i=0,6 do
 			fire(0.375+spc*i,5)
@@ -300,6 +305,9 @@ function draw_start()
 	print(ver,100,120,1)
 	print("by eduardo szesz",0,120,1)
 	drplayer()
+	if cheats>4 then
+		print(bcheats[cheats-4],1,1,8)
+	end
 end
 
 function draw_game()
@@ -538,14 +546,17 @@ function upenemies()
 		
 		if e.md=="atk"	then
 			if e.x<0 or e.x>124 then
+				local pt=3*e.wd
+				local xc=0
+				if ship.x<8 then xc=3 end
 				shake=5
 				sfx(3)
 				del(enemies,e)
-				score+=3*e.wd
+				score+=pt
 				addfloat("shield killing bonus",64,120,1)
 				addfloat("shield killing bonus",63,121,7,2)
-				addfloat("500",ship.x,ship.y,1)
-				addfloat("500",ship.x-1,ship.y+1,7,2)
+				addfloat(tostr(pt).."00",ship.x+xc,ship.y,1)
+				addfloat(tostr(pt).."00",ship.x-1+xc,ship.y+1,7,2)
 			end
 			
 			if t%60==0 and e.typ==8 then	
@@ -1389,6 +1400,9 @@ function upbonus()
 	if coll(ship,bonus) and state!="died" then
 		if not bonus.imm then
 			local txt=rnd(bonustyp)
+			if cheats>4 then
+				txt=bcheats[cheats-4]
+			end
 			explode(bonus.x+4,bonus.y+4,2,20)
 			bonus.imm=true
 			bonus.y=-10
