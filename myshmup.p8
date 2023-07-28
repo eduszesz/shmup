@@ -12,7 +12,7 @@ function _init()
 end
 
 function initialize()
-	ver="v1.1"
+	ver="v1.2"
 	music(1)
 	t=0
 	tt=0
@@ -88,7 +88,7 @@ function initialize()
 	frate=5
 	firetyp=1
 	
-	bonustyp={"shield on"}--"drone strike","drone strike","shield on","1 up!","triple shooting","1 up!","bullet barrage","multi shooting","1 up!","shield on","1 up!","1 up!"}
+	bonustyp={"drone strike","drone strike","shield on","1 up!","triple shooting","1 up!","bullet barrage","multi shooting","1 up!","shield on","1 up!","1 up!"}
 	
 	----------------------------
 	-- required for fade
@@ -234,7 +234,7 @@ function update_start()
 		music(21,10000,8)
 		state="wave"
 		ship.x=64
-		ship.y=80
+		ship.y=90
 	end
 end
 
@@ -544,6 +544,8 @@ function upenemies()
 				score+=3*e.wd
 				addfloat("shield killing bonus",64,120,1)
 				addfloat("shield killing bonus",63,121,7,2)
+				addfloat("500",ship.x,ship.y,1)
+				addfloat("500",ship.x-1,ship.y+1,7,2)
 			end
 			
 			if t%60==0 and e.typ==8 then	
