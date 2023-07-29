@@ -547,16 +547,14 @@ function upenemies()
 		if e.md=="atk"	then
 			if e.x<0 or e.x>124 then
 				local pt=3*e.wd
-				local xc=0
-				if ship.x<8 then xc=3 end
-				shake=5
+				shake=7
 				sfx(3)
 				del(enemies,e)
 				score+=pt
 				addfloat("shield killing bonus",64,120,1)
 				addfloat("shield killing bonus",63,121,7,2)
-				addfloat(tostr(pt).."00",ship.x+xc,ship.y,1)
-				addfloat(tostr(pt).."00",ship.x-1+xc,ship.y+1,7,2)
+				addfloat(tostr(pt).."00",ship.x+4,ship.y-6,1)
+				addfloat(tostr(pt).."00",ship.x+3,ship.y-5,7,2)
 			end
 			
 			if t%60==0 and e.typ==8 then	
