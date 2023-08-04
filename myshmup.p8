@@ -1004,9 +1004,9 @@ end
 function drplayer()
 	sprflash(ship)
 	if ship.sh then
-		local cl1={11,6,12}
-		local cl2={12,11,6}
-		local cl3={6,12,11}
+		local cl1={5,6,12}
+		local cl2={12,5,6}
+		local cl3={6,12,5}
 		local i=1
 		if shield.t<90 then
 			ship.sr=7
