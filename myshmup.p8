@@ -43,7 +43,7 @@ function initialize()
 		age=0,
 		t=45,
 		sh=false, --shield
-		sr=10, --shield radius
+		sr=8, --shield radius
 		box={x1=2,y1=2,x2=5,y2=5}}
 		
 	shield={
@@ -1004,14 +1004,18 @@ end
 function drplayer()
 	sprflash(ship)
 	if ship.sh then
-		local cl={5,6,12}
+		local cl1={11,6,12}
+		local cl2={12,11,6}
+		local cl3={6,12,11}
 		local i=1
 		if shield.t<90 then
-			ship.sr=8
+			ship.sr=7
 		end
 		if shield.t<30 then
-			ship.sr=7
-			cl={5,14,8}
+			ship.sr=6
+			cl1={15,14,8}
+			cl2={8,15,14}
+			cl3={14,8,15}
 		end
 		if t%8<4 then
 			i=2
@@ -1019,9 +1023,9 @@ function drplayer()
 		if t%16<8 then
 			i=3
 		end
-		circ(ship.x+4,ship.y+4,ship.sr+i,cl[i])
-		circ(ship.x+4,ship.y+4,ship.sr+i-2,cl[i])
-		circ(ship.x+4,ship.y+4,ship.sr+i+2,cl[i])
+		circ(ship.x+4,ship.y+4,ship.sr+i-1,cl3[i])
+		circ(ship.x+4,ship.y+4,ship.sr+i,cl1[i])
+		circ(ship.x+4,ship.y+4,ship.sr+i+1,cl2[i])
 	end
 	spr(ship.sp,ship.x,ship.y)
 	pal()
@@ -1372,6 +1376,7 @@ function upshield()
 		shield.t-=1
 		if shield.t<=0 then
 			ship.sh=false
+			ship.sr=8
 		end
 	end
 end
