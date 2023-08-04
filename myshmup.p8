@@ -44,7 +44,7 @@ function initialize()
 		t=45,
 		sh=false, --shield
 		sr=10, --shield radius
-		box={x1=0,y1=0,x2=7,y2=7}}
+		box={x1=2,y1=2,x2=5,y2=5}}
 		
 	shield={
 							x=ship.x,
@@ -62,7 +62,7 @@ function initialize()
 						typ=nil,
 						imm=false,
 						use=false,
-						box={x1=0,y1=0,x2=7,y2=7}}
+						box={x1=-1,y1=-1,x2=8,y2=8}}
 	drone={
 						sp=42,
 						x=64,
@@ -119,6 +119,7 @@ function _update()
 	
 	if state=="wave" then
 		--shake=2
+		if ship.y>112 then ship.y=112 end
 		if wtimer==85 and cwave<10 then
 			sfx(9)
 		end
@@ -210,7 +211,7 @@ function _draw()
 	mkflash()
 	print(debug,110,1,7)
 	
-	--drcollbox(e)
+	--drcollbox(ship)
 	
 end
 
@@ -1019,6 +1020,7 @@ function drplayer()
 			i=3
 		end
 		circ(ship.x+4,ship.y+4,ship.sr+i,cl[i])
+		circ(ship.x+4,ship.y+4,ship.sr+i-2,cl[i])
 		circ(ship.x+4,ship.y+4,ship.sr+i+2,cl[i])
 	end
 	spr(ship.sp,ship.x,ship.y)
