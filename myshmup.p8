@@ -62,7 +62,7 @@ function initialize()
 						typ=nil,
 						imm=false,
 						use=false,
-						box={x1=-1,y1=-1,x2=8,y2=8}}
+						box={x1=-2,y1=-2,x2=9,y2=9}}
 	drone={
 						sp=42,
 						x=64,
@@ -1012,9 +1012,9 @@ function drplayer()
 		end
 		if shield.t<30 then
 			ship.sr=6
-			cl1={14,8,8}
-			cl2={8,14,8}
-			cl3={8,8,14}
+			cl1={2,8,14}
+			cl2={14,2,8}
+			cl3={8,14,2}
 		end
 		if t%8<4 then
 			i=2
