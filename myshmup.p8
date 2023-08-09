@@ -217,7 +217,7 @@ end
 function update_start()
 	local spc=0.25/(6)
 	if btnp(4) then
-		cheats+=1
+		--cheats+=1
 	end
 	if cheats>10 then cheats=0 end
 	if t%7==0 then
@@ -952,6 +952,7 @@ function upplayer()
 		ship.flw=51
 	end
 	
+	
 	if btnp(5) and bonus.use then
 		sfx(30)
 	end
@@ -964,8 +965,9 @@ function upplayer()
 		end
 		bonus.use=true
 	end
-			
-	if btn(4) and state!="died" then
+		
+	if btn(4) and state!="died"
+	 and state!="start" then
 		if ftimer<=0 then
 			if firetyp>1 and bonus.use then
 				local spc=0.25/(firetyp)
