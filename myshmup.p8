@@ -217,7 +217,7 @@ end
 function update_start()
 	local spc=0.25/(6)
 	if btnp(4) then
-		--cheats+=1
+		cheats+=1
 	end
 	if cheats>10 then cheats=0 end
 	if t%7==0 then
@@ -545,7 +545,8 @@ function upenemies()
 		end
 		
 		if e.md=="atk"	then
-			if e.x<0 or e.x>124 then
+			if (e.x<0 or e.x>124) 
+			and ship.sh and e.rimm then
 				local pt=3*e.wd
 				shake=7
 				sfx(3)
