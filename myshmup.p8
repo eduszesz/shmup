@@ -4,6 +4,7 @@ __lua__
 --simple shooter-bullet barrage
 --by eduszesz
 
+
 function _init()
 	cartdata("ss-bulletbarrage")
 	highscore=dget(0)
