@@ -10,16 +10,18 @@ function _init()
 	highscore=dget(0)
 	initialize()
 	newhighscore=false
+	-- toggle autofire in the menu
 	afon="off"
-	menuitem(1,"auto fire off",
+	menuitem(1,"autofire off",
 	function() autofire(-1) end)
-	menuitem(2,"auto fire on",
-	function() autofire(0) end)	
+	menuitem(2,"autofire on",
+	function() autofire(0) end)
+	-- ------------------------------------
 
 end
 
 function initialize()
-	ver="v1.2"
+	ver="v1.3"
 	cheats=0
 	music(1)
 	t=0
@@ -1730,12 +1732,12 @@ end
 function autofire(_i)
 	--toggle autofire using the pause menu
 	local i=_i
-	local t=0
 	if i==0 then afon="on" end
 	if i==-1 then afon="off" end
 end
 
 function pfire()
+	-- player fire action
 	 if state!="died"
 	 and state!="start" then
 			if ftimer<=0 then
