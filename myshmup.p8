@@ -10,6 +10,12 @@ function _init()
 	highscore=dget(0)
 	initialize()
 	newhighscore=false
+	afon="off"
+	menuitem(1,"auto fire off",
+	function() autofire(-1) end)
+	menuitem(2,"auto fire on",
+	function() autofire(0) end)	
+
 end
 
 function initialize()
@@ -968,23 +974,14 @@ function upplayer()
 		bonus.use=true
 	end
 		
-	if btn(4) and state!="died"
-	 and state!="start" then
-		if ftimer<=0 then
-			if firetyp>1 and bonus.use then
-				local spc=0.25/(firetyp)
-				for i=0,firetyp do
-					fire(0.375+spc*i,5)
-				end					
-			else
-				fire(0.5,5)
-			end	
-			mksmoke()
-			sfx(1)
-			ftimer=frate
-		end
-		
+	if btn(4) then
+			pfire()
 	end
+	
+	if afon=="on"then
+		pfire()
+	end
+	
 	ftimer-=1
 	
 	if frate<5 then
@@ -1728,6 +1725,33 @@ end
 function drdrone()
 	spr(drone.sp,drone.x,drone.y)
 	spr(ship.fl,drone.x,drone.y+8)
+end
+
+function autofire(_i)
+	--toggle autofire using the pause menu
+	local i=_i
+	local t=0
+	if i==0 then afon="on" end
+	if i==-1 then afon="off" end
+end
+
+function pfire()
+	 if state!="died"
+	 and state!="start" then
+			if ftimer<=0 then
+				if firetyp>1 and bonus.use then
+					local spc=0.25/(firetyp)
+					for i=0,firetyp do
+						fire(0.375+spc*i,5)
+					end					
+				else
+					fire(0.5,5)
+				end	
+				mksmoke()
+				sfx(1)
+				ftimer=frate
+			end
+		end
 end
 __gfx__
 0000000000d61000000d60000001d600000170000009100000098000000800000000000000000000000000000000000000000000000000000000000000000000
