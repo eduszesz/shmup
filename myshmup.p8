@@ -168,6 +168,7 @@ function _update()
 	end
 	if state=="bdied" then
 		local e=enemies[1]
+		afon="off"
 		e_bullets={}
 		update_game()
 		bdtimer-=1
