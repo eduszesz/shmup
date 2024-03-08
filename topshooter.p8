@@ -17,19 +17,27 @@ function _update()
 	p.dy=0
 	if btn(⬆️) then
 		p.dy=-1
-		p.sp=1
+		if not btn(🅾️) then
+			p.sp=1
+		end
 	end
 	if btn(⬇️) then
 		p.dy=1
-		p.sp=5
+		if not btn(🅾️) then
+			p.sp=5
+		end	
 	end
 	if btn(⬅️) then
 		p.dx=-1
-		p.sp=3
+		if not btn(🅾️) then
+			p.sp=3
+		end	
 	end
 	if btn(➡️) then
 		p.dx=1
-		p.sp=7
+		if not btn(🅾️) then
+			p.sp=7
+		end	
 	end
 	if btnp(❎) then
 		fire()
@@ -96,7 +104,6 @@ end
 function fire()
 	local dx,dy=0,-1
 	local ox,oy=2,-4
-	local fh,fv=false,false
 	if p.sp==5 or p.sp==6 then
 		dx,dy=0,1
 		ox,oy=-2,4
@@ -116,11 +123,12 @@ function fire()
 										dy=dy*6
 										}
 	add(bullets,b)
-	mksmoke()
+	mksmoke(ox,oy)
 end
 
-function mksmoke()
-	local s={r=5,x=p.x,y=p.y}
+function mksmoke(_ox,_oy)
+	local ox,oy=_ox,_oy
+	local s={r=5,x=p.x+ox,y=p.y+oy}
 	add(smoke,s)
 end
 __gfx__
