@@ -149,7 +149,7 @@ function mksmoke(_ox,_oy)
 end
 
 function mkrocks()
-	for i=1,10 do
+	for i=1,11 do
 		mset(rnd(16),rnd(16),48)
 	end
 end
