@@ -11,6 +11,7 @@ function _init()
 	bullets={}
 	smoke={}
 	mkrocks()
+	enemies={}
 end
 
 function _update()
@@ -57,6 +58,7 @@ function _update()
 	p.y+=p.dy
 	updbullets()
 	updsmoke()
+	upenemies()
 end
 
 function _draw()
@@ -73,7 +75,7 @@ function _draw()
 	end
 	drbullets()
 	drsmoke()
-	
+	drenemies()	
 end
 
 function updbullets()
@@ -152,6 +154,41 @@ end
 function mkrocks()
 	for i=1,10 do
 		mset(rnd(16),rnd(16),48)
+	end
+end
+
+function mkenemies()
+	local e={sp=1,
+										x=-10,
+										y=rnd(128),
+										dx=1,
+										dy=0,
+										}
+	add(enemies,e)									
+end
+
+function upenemies()
+	
+	if #enemies==0 and t%60==0 then
+		mkenemies()
+	end
+	
+	for e in all(enemies) do
+		e.x+=e.dx
+		e.y+=e.dy
+		
+		if e.x>130 then
+			del(enemies,e)
+		end
+		
+	end
+end
+
+function drenemies()
+	for e in all(enemies) do
+		pal(11,8)
+		spr(e.sp,e.x,e.y)
+		pal()
 	end
 end
 
