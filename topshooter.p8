@@ -3,7 +3,7 @@ version 42
 __lua__
 --topshooter
 --by eduszesz
---test
+
 
 function _init()
 	t=0
