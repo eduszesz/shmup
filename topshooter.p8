@@ -64,15 +64,7 @@ end
 function _draw()
 	cls(15)
 	map()
-	if p.dx!=0 or p.dy!=0 then
-		if t%8<4 then
-			spr(p.sp+1,p.x,p.y)
-		else
-			spr(p.sp,p.x,p.y)		
-		end
-	else
-		spr(p.sp,p.x,p.y)
-	end
+	aniwalk(p)
 	drbullets()
 	drsmoke()
 	drenemies()	
@@ -158,11 +150,32 @@ function mkrocks()
 end
 
 function mkenemies()
+	local pint={"up","down","left","right"}
+	local pi=rnd(pint)
+	local x=rnd(112)+8
+	local y=rnd(112)+8
+	local dx,dy=0,0
+	if pi=="up" then
+		y=-10
+		dy=1
+	end
+	if pi=="down" then
+		y=130
+		dy=-1
+	end
+	if pi=="left" then
+		x=-10
+		dx=1
+	end
+	if pi=="right" then
+		x=130
+		dx=-1
+	end
 	local e={sp=1,
-										x=-10,
-										y=rnd(128),
-										dx=1,
-										dy=0,
+										x=x,
+										y=y,
+										dx=dx,
+										dy=dy,
 										}
 	add(enemies,e)									
 end
@@ -172,12 +185,21 @@ function upenemies()
 	if #enemies==0 and t%60==0 then
 		mkenemies()
 	end
-	
+	--mkenemies()
 	for e in all(enemies) do
+		if hit((e.x+e.dx),e.y,7,7,0) then
+				e.dx*=-1
+		end
+  	
+		if hit(e.x,(e.y+e.dy),7,7,0) then
+				e.dy*=-1
+		end
+		enedir(e)
+		
 		e.x+=e.dx
 		e.y+=e.dy
-		
-		if e.x>130 then
+		if e.x>150 or e.x<-20
+			or e.y>150 or e.y<-20 then
 			del(enemies,e)
 		end
 		
@@ -187,10 +209,32 @@ end
 function drenemies()
 	for e in all(enemies) do
 		pal(11,8)
-		spr(e.sp,e.x,e.y)
+		aniwalk(e)
 		pal()
 	end
 end
+
+function enedir(_e)
+	local e=_e
+	if e.dx==1 then e.sp=7 end
+	if e.dx==-1 then e.sp=3 end
+	if e.dy==1 then e.sp=5 end
+	if e.dy==-1 then e.sp=1 end
+end
+
+function aniwalk(_p)
+	local p=_p
+	if p.dx!=0 or p.dy!=0 then
+		if t%8<4 then
+			spr(p.sp+1,p.x,p.y)
+		else
+			spr(p.sp,p.x,p.y)		
+		end
+	else
+		spr(p.sp,p.x,p.y)
+	end
+end
+
 
 --collision map entities
 function hit(x,y,w,h,flag)
