@@ -7,15 +7,24 @@ __lua__
 
 function _init()
 	t=0
-	p={x=64,y=64,sp=1,dx=0,dy=0}
+	p={x=64,
+				y=64,
+				sp=1,
+				dx=0,
+				dy=0,
+				box={x1=2,y1=2,x2=5,y2=5}}
 	bullets={}
 	smoke={}
 	mkrocks()
 	enemies={}
+	explosions={}
 end
 
 function _update()
 	t+=1
+	for e in all(enemies) do
+		invencible(e)
+	end
 	p.dx=0
 	p.dy=0
 	if btn(⬆️) then
@@ -59,6 +68,7 @@ function _update()
 	updbullets()
 	updsmoke()
 	upenemies()
+	upexplosions()
 end
 
 function _draw()
@@ -67,7 +77,8 @@ function _draw()
 	aniwalk(p)
 	drbullets()
 	drsmoke()
-	drenemies()	
+	drenemies()
+	drexplosions()
 end
 
 function updbullets()
@@ -131,8 +142,8 @@ function fire()
 										y=p.y+oy,
 										sp=9,
 										dx=dx*6,
-										dy=dy*6
-										}
+										dy=dy*6,
+										box={x1=0,y1=0,x2=7,y2=7}}
 	add(bullets,b)
 	mksmoke(sox,soy)
 end
@@ -144,7 +155,7 @@ function mksmoke(_ox,_oy)
 end
 
 function mkrocks()
-	for i=1,10 do
+	for i=1,5 do
 		mset(rnd(16),rnd(16),48)
 	end
 end
@@ -176,17 +187,33 @@ function mkenemies()
 										y=y,
 										dx=dx,
 										dy=dy,
-										}
+										h=3,
+										t0=5,
+										t=5,
+										inv=false,
+										box={x1=0,y1=0,x2=7,y2=7}}
 	add(enemies,e)									
 end
 
 function upenemies()
 	
-	if #enemies==0 and t%60==0 then
+	if #enemies==0 and t%30==0 then
 		mkenemies()
 	end
-	--mkenemies()
+	
 	for e in all(enemies) do
+		for b in all(bullets) do
+			if coll(e,b) and not e.inv then
+				del(bullets,b)
+				e.inv=true
+				e.h-=1
+				if e.h<0 then
+					mkexplosions(e.x+4,e.y+4)
+					del(enemies,e)
+				end
+			end
+		end
+		
 		if hit((e.x+e.dx),e.y,7,7,0) then
 				e.dx*=-1
 		end
@@ -210,6 +237,14 @@ function drenemies()
 	for e in all(enemies) do
 		pal(11,8)
 		aniwalk(e)
+		if e.inv then
+			for i=0,15 do
+				if t%4<2 then
+					pal(i,7)
+				end
+				aniwalk(e)
+			end
+		end
 		pal()
 	end
 end
@@ -220,6 +255,17 @@ function enedir(_e)
 	if e.dx==-1 then e.sp=3 end
 	if e.dy==1 then e.sp=5 end
 	if e.dy==-1 then e.sp=1 end
+end
+
+function invencible(_p)
+	local p=_p
+	if p.inv then
+		p.t-=1
+	end
+	if p.t<0 then
+		p.t=p.t0
+		p.inv=false
+	end
 end
 
 function aniwalk(_p)
@@ -235,7 +281,27 @@ function aniwalk(_p)
 	end
 end
 
+function mkexplosions(_x,_y)
+	local ex={x=_x,
+											y=_y,
+											r=10}
+	add(explosions,ex)										
+end
 
+function upexplosions()
+	for ex in all(explosions) do
+		ex.r-=1
+		if ex.r<0 then
+			del(explosions,ex)
+		end
+	end
+end
+
+function drexplosions()
+	for ex in all(explosions) do
+		circfill(ex.x,ex.y,ex.r,8)
+	end
+end
 --collision map entities
 function hit(x,y,w,h,flag)
 	local f=flag
