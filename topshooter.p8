@@ -4,7 +4,6 @@ __lua__
 --topshooter
 --by eduszesz
 
-
 function _init()
 	t=0
 	p={x=64,
