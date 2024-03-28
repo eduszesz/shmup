@@ -12,6 +12,9 @@ function _init()
 				sp=1,
 				dx=0,
 				dy=0,
+				h=10,
+				t=10,
+				t0=10,
 				tsk="walk",
 				id="player",
 				box={x1=2,y1=2,x2=5,y2=5}}
@@ -29,6 +32,29 @@ function _update()
 	for e in all(enemies) do
 		invencible(e)
 	end
+	upplayer()
+	updbullets()
+	updsmoke()
+	upenemies()
+	upexplosions()
+	upsparks()
+	upcorpses()
+end
+
+function _draw()
+	cls(15)
+	map()
+	drbullets()
+	drcorpses()
+	drenemies()
+	drplayer()
+	drsparks()
+	drsmoke()
+	drexplosions()
+end
+
+function upplayer()
+	invencible(p)
 	p.dx=0
 	p.dy=0
 	if btn(⬆️) then
@@ -71,36 +97,42 @@ function _update()
 		p.dy=0
 	end
 	
+	for b in all(bullets) do
+		if coll(p,b) and b.id=="enemy" then
+			del(bullets,b)
+				if not p.inv then
+					p.inv=true
+					p.h-=1
+					for i=1,rnd(5)+5 do
+						mrsparks(p.x+4,p.y+4)
+					end
+					if p.h<0 then
+						mkexplosions(p.x+4,p.y+4)
+						mkcorpses(p.x,p.y,p)
+					end
+				end
+		end
+	end
+	
 	p.x+=p.dx
 	p.y+=p.dy
-	updbullets()
-	updsmoke()
-	upenemies()
-	upexplosions()
-	upsparks()
-	upcorpses()
 end
 
-function _draw()
-	cls(15)
-	map()
-	drbullets()
-	drcorpses()
-	drenemies()
-	drexplosions()
-	drsparks()
+function drplayer()
 	aniwalk(p)
-	drsmoke()
+	if p.inv then
+		for i=0,15 do
+			if t%4<2 then
+				pal(i,7)
+			end
+			aniwalk(p)
+		end
+	end
+	pal()
 end
 
 function updbullets()
 	for b in all(bullets) do
-		if t%3==0 then
-			--b.sp+=1
-			if b.sp>10 then
-				--b.sp=9
-			end
-		end
 		b.x+=b.dx
 		b.y+=b.dy
 		if b.x<-8 or b.x>128
@@ -223,20 +255,21 @@ function upenemies()
 	
 	for e in all(enemies) do
 		for b in all(bullets) do
-			if coll(e,b) and b.id!="enemy"
-				and not e.inv then
+			if coll(e,b) and b.id=="player" then
 				del(bullets,b)
-				e.inv=true
-				e.h-=1
-				for i=1,rnd(5)+5 do
-					mrsparks(e.x+4,e.y+4)
+				if not e.inv then
+					e.inv=true
+					e.h-=1
+					for i=1,rnd(5)+5 do
+						mrsparks(e.x+4,e.y+4)
+					end
+					if e.h<0 then
+						mkexplosions(e.x+4,e.y+4)
+						mkcorpses(e.x,e.y,e)
+						del(enemies,e)
+					end
 				end
-				if e.h<0 then
-					mkexplosions(e.x+4,e.y+4)
-					mkcorpses(e.x,e.y)
-					del(enemies,e)
-				end
-			end
+			end	
 		end
 		
 		if hit((e.x+e.dx),e.y,7,7,0) then
@@ -274,7 +307,7 @@ function upenemies()
 		end
 		
 		if e.tsk=="fire" then
-			if t%3==0 and not e.inv then
+			if t%4==0 and not e.inv then
 				fire(e)
 			end
 			local dir={-1,1}
@@ -401,10 +434,11 @@ function drsparks()
 	end
 end
 
-function mkcorpses(_x,_y)
+function mkcorpses(_x,_y,_obj)
 	local cr={x=_x,
 											y=_y,
 											sp=11,
+											id=_obj.id,
 											t=90}
 	add(corpses,cr)
 end
@@ -427,7 +461,13 @@ end
 
 function drcorpses()
 	for cr in all(corpses) do
-		spr(cr.sp,cr.x,cr.y)
+		if cr.id=="player" then
+			pal(8,11)
+			spr(cr.sp,cr.x,cr.y)
+			pal()
+		else	
+			spr(cr.sp,cr.x,cr.y)
+		end	
 	end
 end
 
