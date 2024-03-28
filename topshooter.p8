@@ -7,6 +7,7 @@ __lua__
 function _init()
 	t=0
 	frate=3
+	state="start"
 	p={x=64,
 				y=64,
 				sp=1,
