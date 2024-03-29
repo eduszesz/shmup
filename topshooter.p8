@@ -334,6 +334,25 @@ function upenemies()
 			end	
 		end
 		
+		if e.tsk=="fire" then
+			if t%20==0 and not e.inv then
+				fire(e)
+			end
+			local dir={-1,1}
+			e.ft-=1 
+			if e.ft==0 then
+				e.tsk="walk"
+				e.ft=60
+				if rnd()<0.5 then
+					e.dx=rnd(dir)
+					e.dy=0
+				else
+					e.dy=rnd(dir)
+					e.dx=0	
+				end
+			end
+		end
+		
 		if hit((e.x+e.dx),e.y,7,7,0) then
 				e.dx*=-1
 		end
@@ -357,7 +376,6 @@ function upenemies()
 		
 		if e.dx==0 and 
 			e.tsk=="walk" and abs(e.y-p.y)<7 then
-			e.tsk="fire"
 			if e.x>p.x then
 				e.dx=-1
 				e.dy=0	
@@ -366,27 +384,9 @@ function upenemies()
 				e.dx=1
 				e.dy=0	
 			end
+			e.tsk="fire"
 		end
-		
-		if e.tsk=="fire" then
-			if t%4==0 and not e.inv then
-				fire(e)
-			end
-			local dir={-1,1}
-			e.ft-=1 
-			if e.ft==0 then
-				e.tsk="walk"
-				e.ft=60
-				if rnd()<0.5 then
-					e.dx=rnd(dir)
-					e.dy=0
-				else
-					e.dy=rnd(dir)
-					e.dx=0	
-				end
-			end
-		end
-		
+
 		if e.tsk=="walk" then
 			e.x+=e.dx
 			e.y+=e.dy
