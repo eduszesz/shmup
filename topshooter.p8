@@ -71,6 +71,7 @@ function initialize()
 	explosions={}
 	sparks={}
 	corpses={}
+	dust={}
 end
 
 function update_game()
@@ -84,11 +85,13 @@ function update_game()
 	upexplosions()
 	upsparks()
 	upcorpses()
+	updust()
 end
 
 function draw_game()
 	drbullets()
 	drcorpses()
+	drdust()
 	drenemies()
 	drplayer()
 	drsparks()
@@ -259,24 +262,24 @@ function fire(_p)
 	if p.sp==64 then
 		if p.diry then
 		 dx,dy=0,-1
-		 ox,oy=4,-4
-		 sox,soy=8,8
+		 ox,oy=4,2
+		 sox,soy=7,7
 		else
 			dx,dy=0,1
-		 ox,oy=4,2
-		 sox,soy=7,3
+			ox,oy=3,6
+			sox,soy=7,7
 		end
 	end
 	if p.sp==66 then
 		if p.dirx then
 		 dx,dy=-1,0
-		 ox,oy=6,4
-		 sox,soy=8,8
+		 ox,oy=0,3
+		 sox,soy=6,7
 		 sp=10
 		else
-			dx,dy=1,0
-		 ox,oy=6,4
-		 sox,soy=6,5
+		 dx,dy=1,0
+		 ox,oy=7,4
+		 sox,soy=9,7
 		 sp=10
 		end
 	end
@@ -437,6 +440,9 @@ function upenemies()
 		if e.tsk=="walk" then
 			e.x+=e.dx
 			e.y+=e.dy
+			if e.typ=="jipe" then
+				mkdust(e)
+			end
 		end
 		if e.x>150 or e.x<-20
 			or e.y>150 or e.y<-20 then
@@ -602,13 +608,55 @@ function drcorpses()
 			pal(8,11)
 			spr(cr.sp,cr.x,cr.y)
 			pal()
-		else	
-			spr(cr.sp,cr.x,cr.y)
+		else
+			if cr.sp==68 then
+				spr(cr.sp,cr.x,cr.y,2,2)
+			else
+				spr(cr.sp,cr.x,cr.y)
+			end
 		end	
 	end
 end
 
+function mkdust(_obj)
+	local e=_obj
+	local dx,dy=7,-3
+	if e.sp==64 and e.diry then
+		dx,dy=7,18
+	end
+	if e.sp==66 then
+		if e.dirx then
+			dx,dy=18,7
+		else
+			dx,dy=-3,7
+		end
+	end
+	
+	local d={x=e.x+dx,
+			y=e.y+dy,
+			r=3}
+	add(dust,d)
+end
+
+function updust()
+	for d in all(dust) do
+		d.r-=1
+		if d.r<0 then
+			del(dust,d)
+		end
+	end
+end
+
+function drdust()
+	for d in all(dust) do
+		fillp(░)
+		circfill(d.x,d.y,d.r,6)
+		fillp()
+	end
+end
+
 function mkmap()
+	
 	for y=0,7 do
 		for x=120,127 do
 			if sget(x,y)==1 then
