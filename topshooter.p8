@@ -724,10 +724,10 @@ function mkmap()
 	for y=sp[3],sp[4] do
 		for x=sp[1],sp[2] do
 			if sget(x,y)==1 then
-				mset(x-sp[1]+cx,y+cy,16)
+				mset(x-sp[1]+cx,y-sp[3]+cy,16)
 			end
 			if sget(x,y)==8 then
-				mset(x-sp[1]+cx,y+cy,17)
+				mset(x-sp[1]+cx,y-sp[3]+cy,17)
 			end
 		end
 	end
