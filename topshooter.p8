@@ -6,6 +6,8 @@ __lua__
 
 function _init()
 	t=0
+	mx=0
+	my=0
 	initialize()
 	for x=0,3 do
 		for y=0,1 do
@@ -38,7 +40,8 @@ end
 
 function _draw()
 	cls(15)
-	map()
+	--map(0,0,0,0,16,16)
+	movemap()
 	if state=="start" then
 		print("press 🅾️ to start",30,64,0)
 	end
@@ -766,7 +769,8 @@ function mkmap(_x,_y,_sp)
 end
 
 function movemap()
-	--maps crolls when player move
+	--maps scrolls when player move
+	map(mx,my,0,0,16,16)
 end
 
 --collision map entities
