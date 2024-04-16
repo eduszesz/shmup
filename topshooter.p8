@@ -7,13 +7,15 @@ __lua__
 function _init()
 	t=0
 	mx=0
-	my=0
+	my=16
+	md=0.06
 	initialize()
 	for x=0,3 do
 		for y=0,1 do
 			mkmap(x,y,51+x)
 		end
 	end
+	--mkmap(0,0,0)
 end
 
 function _update()
@@ -114,15 +116,17 @@ function upplayer()
 	p.dy=0
 	if btn(⬆️) then
 		p.dy=-1
+		my+=md*p.dy
 		if not btn(🅾️) then
 			p.sp=1
 		end
 	end
 	if btn(⬇️) then
 		p.dy=1
+		--my+=md*p.dy
 		if not btn(🅾️) then
 			p.sp=5
-		end	
+		end
 	end
 	if btn(⬅️) then
 		p.dx=-1
@@ -192,7 +196,7 @@ function upplayer()
 	if p.h>0 then
 		if p.x<0 then p.x=0 end
 		if p.x>120 then p.x=120 end
-		if p.y<0 then p.y=0 end
+		if p.y<64 then p.y=64 end
 		if p.y>120 then p.y=120 end
 	end
 end
@@ -382,7 +386,7 @@ end
 function upenemies()
 	
 	if #enemies==0 and t%30==0 then
-		mkenemies()
+		--mkenemies()
 	end
 	
 	for e in all(enemies) do
@@ -770,7 +774,17 @@ end
 
 function movemap()
 	--maps scrolls when player move
+	
+	if my<0 then
+		mx+=16
+		my=16
+	if 	mx>48 then
+		mx=0
+		my=16
+	end
+	end
 	map(mx,my,0,0,16,16)
+	
 end
 
 --collision map entities
