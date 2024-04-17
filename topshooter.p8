@@ -9,8 +9,12 @@ function _init()
 	mx=0
 	my=16
 	md=0.06
+	map_w=1024
+	map_h=256
+	rooms={}
+	
 	initialize()
-	for x=0,3 do
+	for x=0,7 do
 		for y=0,1 do
 			mkmap(x,y,51+x)
 		end
@@ -44,7 +48,7 @@ end
 function _draw()
 	cls(15)
 	map()
-	camera(p.x-64,p.y-64)
+	cam(p.x,p.y)
 	--movemap()
 	if state=="start" then
 		print("press 🅾️ to start",30,64,0)
@@ -197,9 +201,9 @@ function upplayer()
 	end
 	if p.h>0 then
 		if p.x<0 then p.x=0 end
-		if p.x>504 then p.x=504 end
-		if p.y<0 then p.y=6 end
-		if p.y>248 then p.y=248 end
+		if p.x>map_w-8 then p.x=map_w-8 end
+		if p.y<0 then p.y=0 end
+		if p.y>map_h-8 then p.y=map_h-8 end
 	end
 end
 
@@ -756,7 +760,7 @@ function mkmap(_x,_y,_sp)
 											{0,7,8,15},
 											{8,15,8,15},
 											{16,23,8,15}}
-	local mc={{1,19},{2,20},{3,21},{4,22},{5,23},{6,24},{7,25},{8,26},{9,27},{10,28}}										
+	local mc={{1,19},{2,20},{3,21},{4,22},{5,23},{6,24},{7,25},{8,26},{9,27}}										
 	for cx=0,8,8 do
 		for cy=0,8,8 do
 			local sp=rnd(tmp)
@@ -775,13 +779,89 @@ function mkmap(_x,_y,_sp)
 end
 
 function mkmaze()
-	for x=0,64 do
-		for y=0,32 do
-			
+	local minrooms=3
+	local maxrooms=10
+	local maxw=16
+	local maxh=16
+
+	
+	for x=0,127 do
+		mset(x,0,28)
+		mset(x,31,28)
+	end
+	for y=0,31 do
+		mset(0,y,28)
+		mset(127,y,28)
+	end
+	
+	for i=1, 100 do
+		local ix=flr(rnd(110)+1)
+		local iy=flr(rnd(14)+1)
+		local w=maxw-flr(rnd(8))
+		local h=maxh-flr(rnd(8))
+		local r={x=ix,
+				 y=iy,
+				 x2=w,
+				 y2=h,
+				 d=false,
+				 box={x1=ix,y1=iy,x2=w,y2=h}}
+		add(rooms,r)		
+	end
+	for r in all(rooms) do
+		for i=1,#rooms do
+			if coll(r,rooms[i]) and
+				r.box!=rooms[i].box then
+					r.d=true
+			end
 		end
 	end
+	for r in all(rooms) do
+		if r.d then
+			del(rooms,r)
+		end
+	end
+	for r in all(rooms) do
+		local ix=r.x
+		local iy=r.y
+		local w=r.x2
+		local h=r.y2
+		for x=ix,w do
+			mset(x,iy,28)
+			mset(x,h,28)
+		end
+		for y=iy,h do
+			mset(ix,y,28)
+			mset(w,y,28)
+		end
+	end
+	
+	
 end
 
+function cam(_x,_y)
+	local cx,cy=_x-64,_y-64
+	if cx<0 then --camera lower x limit
+		cx=0
+	end
+	
+	if cx>(map_w-128) then --camera upper x limit
+		cx=(map_w-128)
+	end
+	
+	if cy<0 then --camera lower y limit
+		cy=0
+	end
+	
+	if map_h<128 then --camera upper y limit
+		cy=-32
+	end
+	if cy>=(map_h-128) and
+	map_h>=128 then
+		cy=map_h-128
+	end
+		
+	camera(cx,cy)
+end
 
 function movemap()
 	--maps scrolls when player move
