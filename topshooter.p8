@@ -788,10 +788,10 @@ end
 function mkmaze()
 	local minrooms=3
 	local maxrooms=10
-	local maxw=16
-	local maxh=16
-
-	
+	local maxw=12
+	local maxh=12
+	local nrooms=flr(rnd(maxrooms-minrooms))+minrooms
+	debug[1]=nrooms
 	for x=0,127 do
 		mset(x,0,28)
 		mset(x,31,28)
@@ -800,50 +800,51 @@ function mkmaze()
 		mset(0,y,28)
 		mset(127,y,28)
 	end
-	
-	for i=1, 10 do
-		local w=maxw-flr(rnd(8))
-		local h=maxh-flr(rnd(8))
-		local ix=flr(rnd(128-w))
-		local iy=flr(rnd(32-h))
-		local r={x=ix,
-											y=iy,
-											x2=w,
-											y2=h,
-											d=false,
-											box={x1=ix,y1=iy,x2=w+ix,y2=h+iy}}
-		add(rooms,r)		
-	end
-	for j=1,#rooms do
-		for i=1,#rooms do
-			if j!=i then
-				if coll(rooms[j],rooms[i]) then
-						rooms[j].d=true
-						debug[j]=rooms[j].d
+	while #rooms<nrooms do
+		for i=1, 10 do
+			local w=maxw-flr(rnd(8))
+			local h=maxh-flr(rnd(8))
+			local ix=flr(rnd(128-w))
+			local iy=flr(rnd(32-h))
+			local r={x=ix,
+												y=iy,
+												x2=w,
+												y2=h,
+												d=false,
+												box={x1=0,y1=0,x2=w,y2=h}}
+			add(rooms,r)		
+		end
+		for j=1,#rooms do
+			for i=1,#rooms do
+				if j!=i then
+					if coll(rooms[j],rooms[i]) then
+							rooms[j].d=true
+					end
 				end
 			end
 		end
-	end
-	for r in all(rooms) do
-		if r.d then
-			del(rooms,r)
+		for r in all(rooms) do
+			if r.d then
+				del(rooms,r)
+			end
 		end
-	end
-	for r in all(rooms) do
-		local ix=r.x
-		local iy=r.y
-		local w=r.x2
-		local h=r.y2
 		
-		for x=0,w do
-				mset(x+ix,iy,28)
-				mset(x+ix,iy+h,28)
-		end
-		for y=0,h do
-				mset(ix,y+iy,28)
-				mset(ix+w,y+iy,28)
-		end		
 	end
+	for r in all(rooms) do
+			local ix=r.x
+			local iy=r.y
+			local w=r.x2
+			local h=r.y2
+			
+			for x=0,w do
+					mset(x+ix,iy,28)
+					mset(x+ix,iy+h,28)
+			end
+			for y=0,h do
+					mset(ix,y+iy,28)
+					mset(ix+w,y+iy,28)
+			end		
+		end	
 end
 
 function cam(_x,_y)
