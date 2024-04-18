@@ -12,7 +12,7 @@ function _init()
 	map_w=1024
 	map_h=256
 	rooms={}
-	
+	debug={}
 	initialize()
 	for x=0,7 do
 		for y=0,1 do
@@ -21,6 +21,7 @@ function _init()
 	end
 	--mkmap(0,0,0)
 	mkmaze()
+	debug[0]=#rooms
 end
 
 function _update()
@@ -60,6 +61,12 @@ function _draw()
 	
 	if state=="over" then
 		print("press 🅾️ to play again",20,64,0)
+	end
+	for i=0,#debug do
+		print(debug[i],0,i*9,8)
+	end
+	for r in all(roms) do
+		rect(r.x,r.y,r.x+r.x2,r.y+r.y2,0)
 	end
 end
 
@@ -794,24 +801,26 @@ function mkmaze()
 		mset(127,y,28)
 	end
 	
-	for i=1, 100 do
-		local ix=flr(rnd(110)+1)
-		local iy=flr(rnd(14)+1)
+	for i=1, 10 do
 		local w=maxw-flr(rnd(8))
 		local h=maxh-flr(rnd(8))
+		local ix=flr(rnd(128-w))
+		local iy=flr(rnd(32-h))
 		local r={x=ix,
-				 y=iy,
-				 x2=w,
-				 y2=h,
-				 d=false,
-				 box={x1=ix,y1=iy,x2=w,y2=h}}
+											y=iy,
+											x2=w,
+											y2=h,
+											d=false,
+											box={x1=ix,y1=iy,x2=w+ix,y2=h+iy}}
 		add(rooms,r)		
 	end
-	for r in all(rooms) do
+	for j=1,#rooms do
 		for i=1,#rooms do
-			if coll(r,rooms[i]) and
-				r.box!=rooms[i].box then
-					r.d=true
+			if j!=i then
+				if coll(rooms[j],rooms[i]) then
+						rooms[j].d=true
+						debug[j]=rooms[j].d
+				end
 			end
 		end
 	end
@@ -825,17 +834,16 @@ function mkmaze()
 		local iy=r.y
 		local w=r.x2
 		local h=r.y2
-		for x=ix,w do
-			mset(x,iy,28)
-			mset(x,h,28)
+		
+		for x=0,w do
+				mset(x+ix,iy,28)
+				mset(x+ix,iy+h,28)
 		end
-		for y=iy,h do
-			mset(ix,y,28)
-			mset(w,y,28)
-		end
+		for y=0,h do
+				mset(ix,y+iy,28)
+				mset(ix+w,y+iy,28)
+		end		
 	end
-	
-	
 end
 
 function cam(_x,_y)
