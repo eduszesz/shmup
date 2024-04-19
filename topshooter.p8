@@ -790,10 +790,10 @@ function mkmap(_x,_y,_sp)
 end
 
 function mkmaze()
-	local minrooms=3
-	local maxrooms=11
-	local maxw=15
-	local maxh=15
+	local minrooms=6
+	local maxrooms=13
+	local maxw=12
+	local maxh=12
 	local nrooms=flr(rnd(maxrooms-minrooms))+minrooms
 	debug[1]=nrooms
 	--[[
@@ -816,11 +816,7 @@ function mkmaze()
 												x2=w,
 												y2=h,
 												d=false,
-												box={x1=0,y1=0,x2=w,y2=h},
-												md={xt={(ix+w)/2,iy},
-													xb={(ix+w)/2,iy+h},
-													yl={ix,(iy+h)/2},
-													yr={ix+w,(iy+h)/2}}}
+												box={x1=0,y1=0,x2=w,y2=h}}
 
 			add(rooms,r)		
 		end
@@ -841,20 +837,28 @@ function mkmaze()
 		
 	end
 	for r in all(rooms) do
-			local ix=r.x
-			local iy=r.y
-			local w=r.x2
-			local h=r.y2
-			
-			for x=0,w do
-					mset(x+ix,iy,28)
-					mset(x+ix,iy+h,28)
-			end
-			for y=0,h do
-					mset(ix,y+iy,28)
-					mset(ix+w,y+iy,28)
-			end		
+		local ix=r.x
+		local iy=r.y
+		local w=r.x2
+		local h=r.y2
+		
+		for x=0,w do
+				mset(x+ix,iy,28)
+				mset(x+ix,iy+h,28)
+				if x==flr(w/2) then
+					mset(x+ix,iy,29)
+					mset(x+ix,iy+h,29)					
+				end
 		end
+		for y=0,h do
+				mset(ix,y+iy,28)
+				mset(ix+w,y+iy,28)
+				if y==flr(h/2) then
+					mset(ix,y+iy,29)
+					mset(ix+w,y+iy,29)
+				end
+		end		
+	end
 end
 
 function cam(_x,_y)
