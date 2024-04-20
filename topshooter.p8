@@ -62,14 +62,8 @@ function _draw()
 	if state=="over" then
 		print("press 🅾️ to play again",20,64,0)
 	end
-	for i=0,#debug do
-		print(debug[i],3,i*9,7)
-		print(debug[i],5,i*9,7)
-		print(debug[i],4,1+i*9,7)
-		print(debug[i],4,-1+i*9,7)
-		print(debug[i],4,i*9,8)
-	end
-	for r in all(roms) do
+	prdebug()
+	for r in all(rooms) do
 		rect(r.x,r.y,r.x+r.x2,r.y+r.y2,0)
 	end
 end
@@ -77,6 +71,8 @@ end
 function initialize()
 	frate=3
 	state="start"
+	camx=0
+	camy=0
 	p={x=64,
 				y=64,
 				sp=1,
@@ -231,7 +227,8 @@ function drplayer()
 		end
 		pal()
 	end
-	line(0,128,0,128-12.8*p.h,8)	
+--	line(0,128,0,128-12.8*p.h,8)	
+	drhud()
 end
 
 function updbullets()
@@ -764,6 +761,10 @@ function drfumes()
 	end
 end
 
+function drhud()
+	line(camx,camy+128,camx,camy+128-12.8*p.h,8)
+end
+
 function mkmap(_x,_y,_sp)
 	local sp=_sp
 	local mx,my=_x*16,_y*16
@@ -862,28 +863,27 @@ function mkmaze()
 end
 
 function cam(_x,_y)
-	local cx,cy=_x-64,_y-64
-	if cx<0 then --camera lower x limit
-		cx=0
+	camx,camy=_x-64,_y-64
+	if camx<0 then --camera lower x limit
+		camx=0
 	end
 	
-	if cx>(map_w-128) then --camera upper x limit
-		cx=(map_w-128)
+	if camx>(map_w-128) then --camera upper x limit
+		camx=(map_w-128)
 	end
 	
-	if cy<0 then --camera lower y limit
-		cy=0
+	if camy<0 then --camera lower y limit
+		camy=0
 	end
 	
 	if map_h<128 then --camera upper y limit
-		cy=-32
+		camy=-32
 	end
-	if cy>=(map_h-128) and
+	if camy>=(map_h-128) and
 	map_h>=128 then
-		cy=map_h-128
+		camy=map_h-128
 	end
-		
-	camera(cx,cy)
+	camera(camx,camy)
 end
 
 function movemap()
@@ -938,6 +938,16 @@ function coll(a,b)
     return false
  end
  return true 
+end
+
+function prdebug()
+	for i=0,#debug do
+		print(debug[i],3,i*9,7)
+		print(debug[i],5,i*9,7)
+		print(debug[i],4,1+i*9,7)
+		print(debug[i],4,-1+i*9,7)
+		print(debug[i],4,i*9,8)
+	end
 end
 __gfx__
 0000000000000500000000000000000000000bbd00033d00db33d000000000000000000000008000000000000000000000000000000000000000000000000000
