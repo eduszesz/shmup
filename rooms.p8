@@ -150,11 +150,14 @@ function mkway()
 				for r in all(rooms) do
 					if coll(r,doors[i]) and
 					not  coll(r,doors[j]) then
-						local w={x1=doors[i].x,
+						if abs(doors[i].x-doors[j].x)<8 and
+							abs(doors[i].y-doors[j].y)<8 then
+							local w={x1=doors[i].x,
 															y1=doors[i].y,
 															x2=doors[j].x,
 															y2=doors[j].y}
-						add(ways,w)									
+							add(ways,w)
+						end										
 					end
 				end
 			end
