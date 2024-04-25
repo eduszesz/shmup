@@ -157,10 +157,14 @@ end
 function mkway()
 	
 	for i=1,#rooms-1 do
-		local w={x1=rooms[i].x,
-											y1=rooms[i].y,
-											x2=rooms[i+1].x,
-											y2=rooms[i+1].y}
+		local x1=(2*rooms[i].x+rooms[i].x2)/2
+		local y1=(2*rooms[i].y+rooms[i].y2)/2
+		local x2=(2*rooms[i+1].x+rooms[i+1].x2)/2
+		local y2=(2*rooms[i+1].y+rooms[i+1].y2)/2
+		local w={x1=x1,
+											y1=y1,
+											x2=x2,
+											y2=y2}
 		add(ways,w)									
 	end
 	--[[
