@@ -2,10 +2,11 @@ pico-8 cartridge // http://www.pico-8.com
 version 42
 __lua__
 function _init()
+	minimap=0
 	debug={}
 	rooms={}
-	doors={}
 	ways={}
+	doors={}
 	map_w=1024
 	map_h=256
 	p={sp=4,
@@ -13,6 +14,7 @@ function _init()
 							y=64,
 							dx=0,
 							dy=0}
+	debug[1]=minimap
 end
 
 function _update()
@@ -21,36 +23,45 @@ function _update()
 	if btnp(🅾️) then
 		clearmap()
 		mkmaze()
-		scandoors()
 		mkway()
 		setways()
+		setdoors()
 		setpl()
 	end
 	
-	if btn(⬆️) then
+	if btnp(❎) then
+		minimap+=1
+		if minimap>1 then
+			minimap=0
+		end
+	end
+	debug[1]=minimap
+	if btnp(⬆️) then
 		p.dy=-1
 	end
-	if btn(⬇️) then
+	if btnp(⬇️) then
 		p.dy=1
 	end
-	if btn(⬅️) then
+	if btnp(⬅️) then
 		p.dx=-1
 	end
-	if btn(➡️) then
+	if btnp(➡️) then
 		p.dx=1
 	end
 	
-	if hit((p.x+p.dx),p.y,4,4,0) then
-		p.dx*=-1
+	if hit((p.x+p.dx),p.y,7,7,0) then
+		--p.dx*=-1
+		p.dx=0
 	end
   	
-	if hit(p.x,(p.y+p.dy),4,4,0) then
-		p.dy*=-1
+	if hit(p.x,(p.y+p.dy),7,7,0) then
+		--p.dy*=-1
+		p.dy=0
 	end
 
 		
-	p.x+=p.dx
-	p.y+=p.dy
+	p.x+=8*p.dx
+	p.y+=8*p.dy
 	
 end
 
@@ -59,8 +70,9 @@ function _draw()
 	map()
 	cam(p.x,p.y)
 	prdebug()
-	drrooms()
-	drways()
+	if minimap==1 then
+		drrooms()
+	end
 	spr(p.sp,p.x,p.y)
 end
 
@@ -71,15 +83,6 @@ function mkmaze()
 	local maxh=12
 	local nrooms=flr(rnd(maxrooms-minrooms))+minrooms
 
-	--[[
-	for x=0,127 do
-		mset(x,0,2)
-		mset(x,31,2)
-	end
-	for y=0,31 do
-		mset(0,y,2)
-		mset(127,y,2)
-	end]]
 	for x=0, 127 do
 		for y=0, 31 do
 			mset(x,y,1)
@@ -93,8 +96,8 @@ function mkmaze()
 		for i=1, nrooms-#rooms do
 			local w=maxw-flr(rnd(8))
 			local h=maxh-flr(rnd(8))
-			local ix=0--flr(rnd(1))
-			local iy=flr(rnd(32-h))
+			local ix=1--flr(rnd(1))
+			local iy=flr(rnd(30-h))+1
 			
 			if #rooms>1 then
 				local i=#rooms-1
@@ -143,30 +146,6 @@ function mkmaze()
 	end
 	
 	
-	--[[ --draw rooms
-	for r in all(rooms) do
-		local ix=r.x
-		local iy=r.y
-		local w=r.x2
-		local h=r.y2
-		
-		for x=0,w do
-				mset(x+ix,iy,1)
-				mset(x+ix,iy+h,1)
-				if x==flr(w/2) then
-					mset(x+ix,iy,3)
-					mset(x+ix,iy+h,3)					
-				end
-		end
-		for y=0,h do
-				mset(ix,y+iy,1)
-				mset(ix+w,y+iy,1)
-				if y==flr(h/2) then
-					mset(ix,y+iy,3)
-					mset(ix+w,y+iy,3)
-				end
-		end		
-	end]]
 	debug[0]=#rooms
 end
 
@@ -184,7 +163,6 @@ end
 
 function clearmap()
 	rooms={}
-	doors={}
 	ways={}
 	for x=0,127 do
 		for y=0,31 do
@@ -193,17 +171,6 @@ function clearmap()
 	end
 end
 
-function scandoors()
-	for x=0,127 do
-		for y=0,31 do
-			if mget(x,y)==3 then
-				local d={x=x,y=y,
-														box={x1=0,y1=0,x2=1,y2=1}}
-				add(doors,d)
-			end
-		end
-	end
-end
 
 function mkway()
 	
@@ -218,26 +185,7 @@ function mkway()
 											y2=y2}
 		add(ways,w)									
 	end
-	--[[
-	for i=1,#doors do
-		for j=1,#doors do
-			if i!=j then
-				for r in all(rooms) do
-					if coll(r,doors[i]) and
-					not  coll(r,doors[j]) then
-						if abs(doors[i].x-doors[j].x)<8 and
-							abs(doors[i].y-doors[j].y)<8 then
-							local w={x1=doors[i].x,
-															y1=doors[i].y,
-															x2=doors[j].x,
-															y2=doors[j].y}
-							add(ways,w)
-						end										
-					end
-				end
-			end
-		end
-	end]]
+	
 
 end
 
@@ -251,6 +199,7 @@ function setways()
 		
 		while abs(x1-x2)>1 do
 			mset(x1,y1,2)
+			mset(x1,y1+1,2)
 			if x1-x2<0 then 
 				x1+=1
 			else
@@ -260,6 +209,7 @@ function setways()
 		
 		while abs(y1-y2)>1 do
 			mset(x1,y1,2)
+			mset(x1+1,y1,2)
 			if y1-y2<0 then 
 				y1+=1
 			else
@@ -267,17 +217,53 @@ function setways()
 			end
 		end
 	end
+	for x=0, 127 do
+		for y=0, 31 do
+			if mget(x,y)==1 then
+				if mget(x+1,y)==2 or
+					mget(x-1,y)==2 or
+					mget(x,y+1)==2 or
+					mget(x,y-1)==2 or
+					mget(x-1,y-1)==2 or
+					mget(x+1,y+1)==2 or
+					mget(x-1,y+1)==2 or
+					mget(x+1,y-1)==2 then
+						mset(x,y,3)
+				end
+			end
+		end
+	end
 end
 
-function drways()
-	for w in all(ways) do
-		--line(w.x1,w.y1,w.x2,w.y2,8)
+function setdoors()
+	for r in all(rooms) do
+		local ix=r.x-1
+		local iy=r.y-1
+		local w=r.x2+2
+		local h=r.y2+2
+		for x=0,w do
+			if mget(x+ix,iy)==2 then
+				mset(x+ix,iy,5)
+			end	
+			if mget(x+ix,iy+h)==2 then
+				mset(x+ix,iy+h,5)
+			end
+		end
+		for y=0,h do
+			if mget(ix,y+iy)==2 then
+				mset(ix,y+iy,5)
+			end	
+			if mget(ix+w,y+iy)==2 then
+				mset(ix+w,y+iy,5)
+			end
+		end
 	end
 end
 
 function drrooms()
 	local x=camx
 	local y=camy
+	rectfill(x,y,x+127,y+31,0)
 	rect(x,y,x+127,y+31,8)
 	for r in all(rooms) do
 		local rx=r.x+x
@@ -285,11 +271,7 @@ function drrooms()
 		rect(rx,ry,rx+r.x2,ry+r.y2,8)
 	end
 	pset(x+flr(p.x/8),y+flr(p.y/8),12)
-	for d in all(doors) do
-		local dx=d.x+x
-		local dy=d.y+y
-		pset(dx,dy,14)
-	end 
+	
 end
 
 function cam(_x,_y)
@@ -355,25 +337,26 @@ function coll(a,b)
 end
 
 function prdebug()
+	local x,y=camx,camy
 	for i=0,#debug do
-		print(debug[i],3,i*9,7)
-		print(debug[i],5,i*9,7)
-		print(debug[i],4,1+i*9,7)
-		print(debug[i],4,-1+i*9,7)
-		print(debug[i],4,i*9,8)
+		print(debug[i],x+3,y+i*9,7)
+		print(debug[i],x+5,y+i*9,7)
+		print(debug[i],x+4,y+1+i*9,7)
+		print(debug[i],x+4,y+-1+i*9,7)
+		print(debug[i],x+4,y+i*9,8)
 	end
 end
 
 
 __gfx__
-000000007777777d00000000eeeeeeee008888000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-000000007666666d00000000eeeeeeee0e0000e00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-007007007666666d00000000eeeeeeee80e00e080000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-000770007665566d00000000eeeeeeee800990080000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-000770007665566d00000000eeeeeeee800990080000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-007007007666666d0000d000eeeeeeee80e00e080000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-000000007666666d00000000eeeeeeee0e0000e00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-00000000dddddddd00000000eeeeeeee008888000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+0000000055555551000000007777777d008888001111111200000000000000000000000000000000000000000000000000000000000000000000000000000000
+0000000050000001000000007666666d0e0000e01444444200000000000000000000000000000000000000000000000000000000000000000000000000000000
+0070070050000001000000007666666d80e00e081444444200000000000000000000000000000000000000000000000000000000000000000000000000000000
+0007700050000001000000007667d66d800990081444444200000000000000000000000000000000000000000000000000000000000000000000000000000000
+000770005000000100000000766dd66d800990081444444200000000000000000000000000000000000000000000000000000000000000000000000000000000
+00700700500000010000d0007666666d80e00e081444444200000000000000000000000000000000000000000000000000000000000000000000000000000000
+0000000050000001000000007666666d0e0000e01444444200000000000000000000000000000000000000000000000000000000000000000000000000000000
+000000001111111100000000dddddddd008888002222222200000000000000000000000000000000000000000000000000000000000000000000000000000000
 __gff__
-0001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+0001000100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
