@@ -58,7 +58,7 @@ function mkmaze()
 	local maxh=12
 	local nrooms=flr(rnd(maxrooms-minrooms))+minrooms
 
-	
+	--[[
 	for x=0,127 do
 		mset(x,0,2)
 		mset(x,31,2)
@@ -66,7 +66,16 @@ function mkmaze()
 	for y=0,31 do
 		mset(0,y,2)
 		mset(127,y,2)
+	end]]
+	for x=0, 127 do
+		for y=0, 31 do
+			mset(x,y,1)
+		end
 	end
+	
+	
+	
+	
 	while #rooms<nrooms do
 		for i=1, nrooms-#rooms do
 			local w=maxw-flr(rnd(8))
@@ -102,11 +111,26 @@ function mkmaze()
 		end
 		for r in all(rooms) do
 			if r.d then
-				del(rooms,r)
+				--del(rooms,r)
 			end
 		end
 		
 	end
+	--carving rooms
+	for r in all(rooms) do
+		local ix=r.x
+		local iy=r.y
+		local w=r.x2
+		local h=r.y2
+		for x=0,w do
+			for y=0,h do
+				mset(x+ix,y+iy,2)
+			end
+		end
+	end
+	
+	
+	--[[ --draw rooms
 	for r in all(rooms) do
 		local ix=r.x
 		local iy=r.y
@@ -129,7 +153,7 @@ function mkmaze()
 					mset(ix+w,y+iy,3)
 				end
 		end		
-	end
+	end]]
 	debug[0]=#rooms
 end
 function clearmap()
@@ -200,7 +224,7 @@ function setways()
 		
 		
 		while abs(x1-x2)>1 do
-			mset(x1,y1,3)
+			mset(x1,y1,2)
 			if x1-x2<0 then 
 				x1+=1
 			else
@@ -209,7 +233,7 @@ function setways()
 		end
 		
 		while abs(y1-y2)>1 do
-			mset(x1,y1,3)
+			mset(x1,y1,2)
 			if y1-y2<0 then 
 				y1+=1
 			else
