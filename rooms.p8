@@ -7,6 +7,7 @@ function _init()
 	rooms={}
 	ways={}
 	doors={}
+	auxt={}
 	map_w=1024
 	map_h=256
 	p={sp=16,
@@ -198,6 +199,7 @@ function mkway()
 		local y1=(2*rooms[i].y+rooms[i].y2)/2
 		local x2=(2*rooms[i+1].x+rooms[i+1].x2)/2
 		local y2=(2*rooms[i+1].y+rooms[i+1].y2)/2
+				
 		local w={x1=x1,
 											y1=y1,
 											x2=x2,
@@ -210,48 +212,62 @@ end
 
 function setways()
 	for w in all(ways) do
-		local x1=w.x1
-		local y1=w.y1
-		local x2=w.x2
-		local y2=w.y2
 		
-		
-		while abs(x1-x2)>1 do
-			local c={x=x1,
-											y=x2,
-											box={x1=0,y1=0,x2=1,y2=1}}
-			for r in all(rooms) do
-				if not coll(r,c) do
-					mset(x1,y1,2)
-					mset(x1,y1+1,2)
-				end
-			end
-			
-			if x1-x2<0 then 
-				x1+=1
-			else
-				x1-=1
-			end
-		end
-		
-		while abs(y1-y2)>1 do
-			local c={x=x1,
-											y=x2,
-											box={x1=0,y1=0,x2=1,y2=1}}
-			for r in all(rooms) do
-				if not coll(r,c) do
-					mset(x1,y1,2)
-					mset(x1+1,y1,2)	
-				end
-			end
-			
-			if y1-y2<0 then 
-				y1+=1
-			else
-				y1-=1
-			end
+		auxt={w.x1,w.y1,w.x2,w.y2}
+		if rnd()<0.5 then
+			xways(unpack(auxt))		
+			yways(unpack(auxt))		
+		else	
+			yways(unpack(auxt))		
+			xways(unpack(auxt))	
 		end
 	end
+end
+
+function xways(x1,y1,x2,y2)
+	while abs(x1-x2)>1 do
+		local c={x=x1,
+										y=x2,
+										box={x1=0,y1=0,x2=1,y2=1}}
+		for r in all(rooms) do
+			if not coll(r,c) do
+				mset(x1,y1,2)
+				mset(x1,y1+1,2)
+			end
+		end
+		
+		if x1-x2<0 then 
+			x1+=1
+		else
+			x1-=1
+		end
+	end
+	auxt={x1,y1,x2,y2}
+end
+
+function yways(x1,y1,x2,y2)
+	while abs(y1-y2)>1 do
+		local c={x=x1,
+										y=x2,
+										box={x1=0,y1=0,x2=1,y2=1}}
+		for r in all(rooms) do
+			if not coll(r,c) do
+				local i=0
+				if y1-y2>0 then
+					i=1
+				end
+				mset(x1,y1+i,2)
+				mset(x1+1,y1+i,2)	
+			end
+		end
+		
+		if y1-y2<0 then 
+			y1+=1
+		else
+			y1-=1
+		end
+	end
+	auxt={x1,y1,x2,y2}	
 end
 
 function setdoors()
