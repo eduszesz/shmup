@@ -305,12 +305,15 @@ end
 function drrooms()
 	local x=camx
 	local y=camy
+	local i=1
 	rectfill(x,y,x+127,y+31,0)
 	rect(x,y,x+127,y+31,8)
 	for r in all(rooms) do
 		local rx=r.x+x
 		local ry=r.y+y
 		rect(rx,ry,rx+r.x2,ry+r.y2,8)
+		print(i,rx,ry,7)
+		i+=1
 	end
 	pset(x+flr(p.x/8),y+flr(p.y/8),12)
 	
