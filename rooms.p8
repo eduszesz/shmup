@@ -83,9 +83,9 @@ end
 
 function mkmaze()
 	local minrooms=6
-	local maxrooms=13
-	local maxw=12
-	local maxh=12
+	local maxrooms=11
+	local maxw=14
+	local maxh=14
 	local nrooms=flr(rnd(maxrooms-minrooms))+minrooms
 
 	for x=0, 127 do
@@ -93,22 +93,16 @@ function mkmaze()
 			mset(x,y,1)
 		end
 	end
-	--[[
-	local r={x=1,
-												y=1,
-												x2=8,
-												y2=8,
-												d=false,
-												box={x1=0,y1=0,x2=w,y2=h}}
-	add(rooms,r)]]
+	
 	
 	while #rooms<nrooms do
 		for i=1, nrooms-#rooms do
 			local w=maxw-flr(rnd(8))
 			local h=maxh-flr(rnd(8))
-			local ix=1--flr(rnd(1))
-			local iy=1
+			local ix=flr(rnd(127-w))+1
+			local iy=flr(rnd(30-h))+1
 			
+			--[[
 			if #rooms>1 then
 				local j=#rooms-1
 				if rnd()>0.9 then
@@ -121,7 +115,7 @@ function mkmaze()
 				if ix+w>127  then
 					ix-=ix+w-125
 				end
-			end
+			end]]
 			
 			local r={x=ix,
 												y=iy,
@@ -130,13 +124,11 @@ function mkmaze()
 												d=false,
 												box={x1=0,y1=0,x2=w,y2=h}}
 												
-				--if not coll(rooms[i],r) then
-					--add(rooms,r)	
-				--end
+				
 			add(rooms,r)
 					
 		end
-		
+		sortbyx(rooms)
 		for j=1,#rooms do
 			for i=1,#rooms do
 				if j!=i then
@@ -155,6 +147,7 @@ function mkmaze()
 		end
 		
 	end
+	
 	mkway()
 	setways()
 	--carving rooms
@@ -163,15 +156,15 @@ function mkmaze()
 		local iy=r.y
 		local w=r.x2
 		local h=r.y2
-		for x=0,w do
-			for y=0,h do
+		for x=1,w-1 do
+			for y=1,h-1 do
 				mset(x+ix,y+iy,2)
 			end
 		end
 	end
 	
 	setdoors()
-	debug[0]=#rooms
+	
 end
 
 function setpl()
@@ -279,10 +272,10 @@ function setdoors()
 		end
 	end
 	for r in all(rooms) do
-		local ix=r.x-1
-		local iy=r.y-1
-		local w=r.x2+2
-		local h=r.y2+2
+		local ix=r.x
+		local iy=r.y
+		local w=r.x2
+		local h=r.y2
 		for x=0,w do
 			if mget(x+ix,iy)==2 then
 				mset(x+ix,iy,4)
@@ -383,15 +376,26 @@ end
 
 function prdebug()
 	local x,y=camx,camy
-	for i=0,#debug do
-		print(debug[i],x+3,y+i*9,7)
-		print(debug[i],x+5,y+i*9,7)
-		print(debug[i],x+4,y+1+i*9,7)
-		print(debug[i],x+4,y+-1+i*9,7)
-		print(debug[i],x+4,y+i*9,8)
+	if #debug>0 then
+		for i=1,#debug do
+			print(debug[i],x+3,y+i*9,7)
+			print(debug[i],x+5,y+i*9,7)
+			print(debug[i],x+4,y+1+i*9,7)
+			print(debug[i],x+4,y+-1+i*9,7)
+			print(debug[i],x+4,y+i*9,8)
+		end
 	end
 end
 
+function sortbyx(a)
+    for i=1,#a do
+        local j = i
+        while j > 1 and a[j-1].x > a[j].x do
+            a[j].x,a[j-1].x = a[j-1].x,a[j].x
+            j = j - 1
+        end
+    end
+end
 
 __gfx__
 0000000055555551000000007777777d111111120000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
