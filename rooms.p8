@@ -199,6 +199,20 @@ function mkway()
 		local y1=(2*rooms[i].y+rooms[i].y2)/2
 		local x2=(2*rooms[i+1].x+rooms[i+1].x2)/2
 		local y2=(2*rooms[i+1].y+rooms[i+1].y2)/2
+		
+		if abs(x1-rooms[i+1].x)<4 then
+			x1-=2
+		end
+		if abs(x2-rooms[i].x-rooms[i].x2)<4 then
+			x2+=2
+		end
+		if abs(y1-rooms[i+1].y)<4 then
+			y1-=2
+		end
+		if abs(y2-rooms[i].y-rooms[i].y2)<4 then
+			y2+=2
+		end
+		
 				
 		local w={x1=x1,
 											y1=y1,
