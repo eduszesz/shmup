@@ -21,6 +21,7 @@ function _update()
 		mkmaze()
 		scandoors()
 		mkway()
+		setways()
 	end
 	
 	if btnp(⬆️) then
@@ -190,9 +191,37 @@ function mkway()
 
 end
 
+function setways()
+	for w in all(ways) do
+		local x1=w.x1
+		local y1=w.y1
+		local x2=w.x2
+		local y2=w.y2
+		
+		
+		while abs(x1-x2)>1 do
+			mset(x1,y1,3)
+			if x1-x2<0 then 
+				x1+=1
+			else
+				x1-=1
+			end
+		end
+		
+		while abs(y1-y2)>1 do
+			mset(x1,y1,3)
+			if y1-y2<0 then 
+				y1+=1
+			else
+				y1-=1
+			end
+		end
+	end
+end
+
 function drways()
 	for w in all(ways) do
-		line(w.x1,w.y1,w.x2,w.y2,8)
+		--line(w.x1,w.y1,w.x2,w.y2,8)
 	end
 end
 
