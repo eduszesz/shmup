@@ -4,6 +4,8 @@ __lua__
 function _init()
 	debug={}
 	rooms={}
+	doors={}
+	ways={}
 	camx=0
 	camy=0
 	dx=0
@@ -17,6 +19,8 @@ function _update()
 	if btnp(🅾️) then
 		clearmap()
 		mkmaze()
+		scandoors()
+		mkway()
 	end
 	
 	if btnp(⬆️) then
@@ -42,6 +46,7 @@ function _draw()
 	camera(camx,camy)
 	prdebug()
 	drrooms()
+	drways()
 end
 
 function mkmaze()
@@ -117,12 +122,69 @@ function mkmaze()
 end
 function clearmap()
 	rooms={}
+	doors={}
+	ways={}
 	for x=0,127 do
 		for y=0,31 do
 			mset(x,y,0)
 		end
 	end
 end
+
+function scandoors()
+	for x=0,127 do
+		for y=0,31 do
+			if mget(x,y)==3 then
+				local d={x=x,y=y,
+														box={x1=0,y1=0,x2=1,y2=1}}
+				add(doors,d)
+			end
+		end
+	end
+end
+
+function mkway()
+	for i=1,#doors do
+		for j=1,#doors do
+			if i!=j then
+				for r in all(rooms) do
+					if coll(r,doors[i]) and
+					not  coll(r,doors[j]) then
+						local w={x1=doors[i].x,
+															y1=doors[i].y,
+															x2=doors[j].x,
+															y2=doors[j].y}
+						add(ways,w)									
+					end
+				end
+			end
+		end
+	end
+end
+
+function drways()
+	for w in all(ways) do
+		line(w.x1,w.y1,w.x2,w.y2,8)
+	end
+end
+
+function drrooms()
+	local x=camx
+	local y=camy
+	rect(x,y,x+127,y+31,8)
+	for r in all(rooms) do
+		local rx=r.x+x
+		local ry=r.y+y
+		rect(rx,ry,rx+r.x2,ry+r.y2,8)
+	end
+	pset(x+flr(x/8),y+flr(y/8),12)
+	for d in all(doors) do
+		local dx=d.x+x
+		local dy=d.y+y
+		pset(dx,dy,14)
+	end 
+end
+
 function abs_box(s)
  local box = {}
  box.x1 = s.box.x1 + s.x
@@ -157,17 +219,7 @@ function prdebug()
 	end
 end
 
-function drrooms()
-	local x=camx
-	local y=camy
-	rect(x,y,x+127,y+31,8)
-	for r in all(rooms) do
-		local rx=r.x+x
-		local ry=r.y+y
-		rect(rx,ry,rx+r.x2,ry+r.y2,8)
-	end
-	pset(x+flr(x/8),y+flr(y/8),12)
-end
+
 __gfx__
 00000000dddddddd33333333eeeeeeee000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 00000000dddddddd33333333eeeeeeee000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
