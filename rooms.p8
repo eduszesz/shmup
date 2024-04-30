@@ -195,29 +195,45 @@ end
 function mkway()
 	
 	for i=1,#rooms-1 do
-		local x1=(2*rooms[i].x+rooms[i].x2)/2
-		local y1=(2*rooms[i].y+rooms[i].y2)/2
-		local x2=(2*rooms[i+1].x+rooms[i+1].x2)/2
-		local y2=(2*rooms[i+1].y+rooms[i+1].y2)/2
+		local x11=rooms[i].x
+		local y11=rooms[i].y
+		local x12=rooms[i].x+rooms[i].x2
+		local y12=rooms[i].y+rooms[i].y2
 		
-		if abs(x1-rooms[i+1].x)<4 then
-			x1-=2
-		end
-		if abs(x2-rooms[i].x-rooms[i].x2)<4 then
-			x2+=2
-		end
-		if abs(y1-rooms[i+1].y)<4 then
-			y1-=2
-		end
-		if abs(y2-rooms[i].y-rooms[i].y2)<4 then
-			y2+=2
+		local x21=rooms[i+1].x
+		local y21=rooms[i+1].y
+		local x22=rooms[i+1].x+rooms[i+1].x2
+		local y22=rooms[i+1].y+rooms[i+1].y2
+		
+		local x1m=(x11+x12)/2
+		local y1m=(y11+y12)/2
+		local x2m=(x21+x22)/2
+		local y2m=(y21+y22)/2
+		
+		if abs(y1m-y21)<2 then
+			y1m=(y12+y21)/2
+			y2m=y1m
 		end
 		
+		if abs(y1m-y22)<2 then
+			y1m=(y11+y22)/2
+			y2m=y1m
+		end
+		
+		if abs(x1m-x21)<2 then
+			x1m=(x21+x12)/2
+			x2m=x1m
+		end
+		
+		if abs(x1m-x22)<2 then
+			x1m=(x11+x22)/2
+			x2m=x1m
+		end
 				
-		local w={x1=x1,
-											y1=y1,
-											x2=x2,
-											y2=y2}
+		local w={x1=x1m,
+											y1=y1m,
+											x2=x2m,
+											y2=y2m}
 		add(ways,w)									
 	end
 	
