@@ -85,7 +85,7 @@ end
 function mkmaze()
 	local minrooms=6
 	local maxrooms=11
-	local maxw=14
+	local maxw=16
 	local maxh=14
 	local nrooms=flr(rnd(maxrooms-minrooms))+minrooms
 
@@ -210,22 +210,26 @@ function mkway()
 		local x2m=(x21+x22)/2
 		local y2m=(y21+y22)/2
 		
-		if abs(y1m-y21)<2 then
+		if abs(y1m-y21)<3 and 
+			abs(y12-y21)>1 then
 			y1m=(y12+y21)/2
 			y2m=y1m
 		end
 		
-		if abs(y1m-y22)<2 then
+		if abs(y1m-y22)<3
+		and abs(y11-y22)>1 then
 			y1m=(y11+y22)/2
 			y2m=y1m
 		end
 		
-		if abs(x1m-x21)<2 then
+		if abs(x1m-x21)<3 
+			and abs(x21-x12)>1 then
 			x1m=(x21+x12)/2
 			x2m=x1m
 		end
 		
-		if abs(x1m-x22)<2 then
+		if abs(x1m-x22)<3 
+			and abs(x11-x22)>1then
 			x1m=(x11+x22)/2
 			x2m=x1m
 		end
