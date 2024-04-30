@@ -48,15 +48,20 @@ function _update()
 	end
 	
 	if hit((p.x+p.dx),p.y,7,7,0) then
-		--p.dx*=-1
 		p.dx=0
 	end
   	
 	if hit(p.x,(p.y+p.dy),7,7,0) then
-		--p.dy*=-1
 		p.dy=0
 	end
-
+	
+	if hit((p.x+p.dx),p.y,7,7,1) then
+		mset(flr((p.x+p.dx)/8),flr(p.y/8),2)
+	end
+  	
+	if hit(p.x,(p.y+p.dy),7,7,1) then
+		mset(flr(p.x/8),flr((p.y+p.dy)/8),2)
+	end
 		
 	p.x+=8*p.dx
 	p.y+=8*p.dy
@@ -85,7 +90,7 @@ end
 function mkmaze()
 	local minrooms=6
 	local maxrooms=11
-	local maxw=16
+	local maxw=14
 	local maxh=14
 	local nrooms=flr(rnd(maxrooms-minrooms))+minrooms
 
@@ -210,34 +215,55 @@ function mkway()
 		local x2m=(x21+x22)/2
 		local y2m=(y21+y22)/2
 		
-		if abs(y1m-y21)<3 and 
-			abs(y12-y21)>1 then
-			y1m=(y12+y21)/2
-			y2m=y1m
+		local xf=true
+		
+		if rnd()>0.5 then
+			xf=false
+		else
+			xf=true
 		end
 		
-		if abs(y1m-y22)<3
-		and abs(y11-y22)>1 then
-			y1m=(y11+y22)/2
-			y2m=y1m
+		if abs(y1m-y21)<3 then  
+			if abs(y12-y21)>1 then
+				y1m=(y12+y21)/2
+				y2m=y1m
+			else
+				xf=false
+			end
 		end
 		
-		if abs(x1m-x21)<3 
-			and abs(x21-x12)>1 then
-			x1m=(x21+x12)/2
-			x2m=x1m
+		if abs(y1m-y22)<3 then
+			if abs(y11-y22)>1 then
+				y1m=(y11+y22)/2
+				y2m=y1m
+			else
+				xf=false
+			end
 		end
 		
-		if abs(x1m-x22)<3 
-			and abs(x11-x22)>1then
-			x1m=(x11+x22)/2
-			x2m=x1m
+		if abs(x1m-x21)<3 then
+			if abs(x21-x12)>1 then
+				x1m=(x21+x12)/2
+				x2m=x1m
+			else
+				xf=true
+			end
+		end
+		
+		if abs(x1m-x22)<3 then
+			if abs(x11-x22)>1then
+				x1m=(x11+x22)/2
+				x2m=x1m
+			else
+				xf=true
+			end
 		end
 				
 		local w={x1=x1m,
 											y1=y1m,
 											x2=x2m,
-											y2=y2m}
+											y2=y2m,
+											xf=xf}
 		add(ways,w)									
 	end
 	
@@ -248,7 +274,7 @@ function setways()
 	for w in all(ways) do
 		
 		auxt={w.x1,w.y1,w.x2,w.y2}
-		if rnd()<0.5 then
+		if w.xf then
 			xways(unpack(auxt))		
 			yways(unpack(auxt))		
 		else	
