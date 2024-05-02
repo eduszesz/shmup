@@ -58,7 +58,8 @@ function _update()
 	
 	if hit((p.x+p.dx),p.y,7,7,1) then
 		local od={x=flr((p.x+p.dx)/8),
-				y=flr(p.y/8)}
+				y=flr(p.y/8),
+				dir="x"}
 				add(opdoors,od)
 		--mset(flr((p.x+p.dx)/8),flr(p.y/8),6)
 		p.dx=0
@@ -66,7 +67,8 @@ function _update()
   	
 	if hit(p.x,(p.y+p.dy),7,7,1) then
 		local od={x=flr(p.x/8),
-				y=flr((p.y+p.dy)/8)}
+				y=flr((p.y+p.dy)/8),
+				dir="y"}
 				add(opdoors,od)
 		--mset(flr(p.y/8),flr((p.y+p.dy)/8),6)
 		p.dy=0
@@ -386,22 +388,22 @@ function setdoors()
 				add(dr,{x=ix+w,y=y+iy})
 			end
 		end
-		if #du<4 then
+		if #du<5 then
 			for d in all(du) do
 				mset(d.x,d.y,4)
 			end
 		end
-		if #db<4 then
+		if #db<5 then
 			for d in all(db) do
 				mset(d.x,d.y,4)
 			end
 		end
-		if #dl<4 then
+		if #dl<5 then
 			for d in all(dl) do
 				mset(d.x,d.y,4)
 			end
 		end
-		if #dr<4 then
+		if #dr<5 then
 			for d in all(dr) do
 				mset(d.x,d.y,4)
 			end
@@ -412,6 +414,15 @@ end
 function opendoors()
 	for od in all(opdoors) do
 		local x,y=od.x,od.y
+		
+		if od.dir=="x" then
+			local int=-2
+			local fim=2
+			if mget(x,y+1)==2 then
+				int=-4
+				fim=0
+			end
+		end
 		
 		for i=-2,2 do
 			for j=-2,2 do
