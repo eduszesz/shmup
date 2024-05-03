@@ -415,23 +415,121 @@ function opendoors()
 	for od in all(opdoors) do
 		local x,y=od.x,od.y
 		
-		if od.dir=="x" then
-			local int=-2
-			local fim=2
-			if mget(x,y+1)==2 then
-				int=-4
-				fim=0
+		local j=0
+		while 
+			local i=1
+			while mget(x+j,y+i)==4 do
+				mset(x+j,y+i,6)
+				i+=1
 			end
+			i=-1
+			while mget(x+j,y+i)==4 do
+				mset(x+j,y+i,6)
+				i-=1
+			end
+			if mget(x+j,y)==4 then
+				mset(x+j,y,6)
+				i=1
+			end
+			j+=1
+		end
+		j=0
+		while mget(x,y+j)==4 do
+			local i=1
+			while mget(x+i,y+j)==4 do
+				mset(x+i,y+j,6)
+				i+=1
+			end
+			i=-1
+			while mget(x+i,y+j)==4 do
+				mset(x+i,y+j,6)
+				i-=1
+			end
+			if mget(x,y+j)==4 then
+				mset(x,y+j,6)
+				i=1
+			end
+			j+=1
+		end
+		j=0
+		while mget(x,y+j)==4 do
+			local i=1
+			while mget(x+i,y+j)==4 do
+				mset(x+i,y+j,6)
+				i+=1
+			end
+			i=-1
+			while mget(x+i,y+j)==4 do
+				mset(x+i,y+j,6)
+				i-=1
+			end
+			if mget(x,y+j)==4 then
+				mset(x,y+j,6)
+				i=1
+			end
+			j-=1
 		end
 		
-		for i=-2,2 do
-			for j=-2,2 do
-				if mget(x+i,y+j)==4 then
-					mset(x+i,y+j,6)
+		--[[
+		if od.dir=="x" then
+			local j=1
+			local i=0
+			if mget(x,y+1)!=4 then
+				j=-1
+			end
+			if mget(x,y-1)!=4 then
+				j=1
+			end
+			
+			while mget(x,y+i)==4 do
+				mset(x,y+i,6)
+				i+=j
+			end
+			i=0
+			if mget(x+1,y)==4 then
+				for j=-1,1,2 do
+					while mget(x+1,y+i)==4 do
+						mset(x+1,y+i,6)
+						i+=j
+					end
 				end
 			end
+			
 		end
-		
+		if od.dir=="y" then
+			local j=1
+			local i=0
+			if mget(x+1,y)!=4 then
+				j=-1
+			end
+			if mget(x-1,y)!=4 then
+				j=1
+			end
+			while mget(x+i,y)==4 do
+				mset(x+i,y,6)
+				i+=j
+			end
+			i=0
+			if mget(x,y+1)==4 then
+				for j=-1,1,2 do
+					while mget(x+i,y)==4 do
+						mset(x+i,y-j,6)
+						i+=j
+					end
+				end
+			end
+			i=0
+			if mget(x,y-1)==4 then
+				for j=-1,1,2 do
+					while mget(x+i,y)==4 do
+						mset(x+i,y-j,6)
+						i+=j
+					end
+				end
+			end
+			
+		end
+	]]	
 	end
 end
 
