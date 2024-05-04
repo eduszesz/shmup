@@ -7,7 +7,7 @@ function _init()
 	rooms={}
 	ways={}
 	doors={}
-	opdoors={}
+	tledoors={}
 	auxt={}
 	map_w=1024
 	map_h=256
@@ -57,19 +57,19 @@ function _update()
 	end
 	
 	if hit((p.x+p.dx),p.y,7,7,1) then
-		local od={x=flr((p.x+p.dx)/8),
+		local d={x=flr((p.x+p.dx)/8),
 				y=flr(p.y/8),
 				dir="x"}
-				add(opdoors,od)
+				add(doors,d)
 		--mset(flr((p.x+p.dx)/8),flr(p.y/8),6)
 		p.dx=0
 	end
   	
 	if hit(p.x,(p.y+p.dy),7,7,1) then
-		local od={x=flr(p.x/8),
+		local d={x=flr(p.x/8),
 				y=flr((p.y+p.dy)/8),
 				dir="y"}
-				add(opdoors,od)
+				add(doors,d)
 		--mset(flr(p.y/8),flr((p.y+p.dy)/8),6)
 		p.dy=0
 	end
@@ -200,7 +200,7 @@ end
 function clearmap()
 	rooms={}
 	ways={}
-	opdoors={}
+	doors={}
 	for x=0,127 do
 		for y=0,31 do
 			mset(x,y,0)
@@ -343,6 +343,14 @@ function yways(x1,y1,x2,y2)
 end
 
 function setdoors()
+	for x=0,127 do
+		mset(x,0,1)
+		mset(x,31,1)
+	end
+	for y=0,31 do
+		mset(0,y,1)
+		mset(127,y,1)
+	end
 	for x=0, 127 do
 		for y=0, 31 do
 			if mget(x,y)==1 then
@@ -409,23 +417,62 @@ function setdoors()
 			end
 		end
 	end
+	for x=0,127 do
+		for y=0,31 do
+			if mget(x,y)==4 then
+				 local d={x=x,y=y}
+				 add(tledoors,d)
+			end
+		end
+	end
+	for d in all(tledoors) do
+		local sum=0
+		for i=-1,1,2 do
+			if mget(d.x+i,d.y)==2 then
+						sum+=1
+			end
+		end	
+		for j=-1,1,2 do	
+			if mget(d.x,d.y+j)==2 then
+				sum+=1
+			end
+		end
+		
+	end
+	if sum==3 then
+		local x,y=0,0
+		for i=-1,1,2 do
+			if mget(d.x+i,d.y)==3 then
+				x=d.x+(i*-1)
+				y=d.y
+				mset(x,y,7)		
+			end
+		end	
+		for j=-1,1,2 do	
+			if mget(d.x,d.y+j)==3 then
+				x=d.x
+				y=d.y+(j*-1)
+				mset(x,y,7)
+			end
+		end
+	end
 end
 
 function ydoors(x,y,j)
  local _j=j
  local j=0
-	while mget(x+j,y)==4 do 
+	while mget(x+j,y)>=4 do 
 		local i=1
-		while mget(x+j,y+i)==4 do
+		while mget(x+j,y+i)>=4 do
 			mset(x+j,y+i,6)
 			i+=1
 		end
 		i=-1
-		while mget(x+j,y+i)==4 do
+		while mget(x+j,y+i)>=4 do
 			mset(x+j,y+i,6)
 			i-=1
 		end
-		if mget(x+j,y)==4 then
+		if mget(x+j,y)>=4 then
 			mset(x+j,y,6)
 			i=1
 		end
@@ -436,18 +483,18 @@ end
 
 function xdoors(x,y,j)
 	local _j=j
-	while mget(x,y+j)==4 do
+	while mget(x,y+j)>=4 do
 		local i=1
-		while mget(x+i,y+j)==4 do
+		while mget(x+i,y+j)>=4 do
 			mset(x+i,y+j,6)
 			i+=1
 		end
 		i=-1
-		while mget(x+i,y+j)==4 do
+		while mget(x+i,y+j)>=4 do
 			mset(x+i,y+j,6)
 			i-=1
 		end
-		if mget(x,y+j)==4 then
+		if mget(x,y+j)>=4 then
 			mset(x,y+j,6)
 			i=1
 		end
@@ -456,129 +503,12 @@ function xdoors(x,y,j)
 end
 
 function opendoors()
-	for od in all(opdoors) do
-		local x,y=od.x,od.y
+	for d in all(doors) do
+		local x,y=d.x,d.y
 		ydoors(x,y,1)
 		ydoors(x,y,-1)
 		xdoors(x,y,1)
-		xdoors(x,y,-1)
-		--[[
-		local j=0
-		while mget(x+j,y)==4 do 
-			local i=1
-			while mget(x+j,y+i)==4 do
-				mset(x+j,y+i,6)
-				i+=1
-			end
-			i=-1
-			while mget(x+j,y+i)==4 do
-				mset(x+j,y+i,6)
-				i-=1
-			end
-			if mget(x+j,y)==4 then
-				mset(x+j,y,6)
-				i=1
-			end
-			j+=1
-		end
-		j=0
-	
-		while mget(x,y+j)==4 do
-			local i=1
-			while mget(x+i,y+j)==4 do
-				mset(x+i,y+j,6)
-				i+=1
-			end
-			i=-1
-			while mget(x+i,y+j)==4 do
-				mset(x+i,y+j,6)
-				i-=1
-			end
-			if mget(x,y+j)==4 then
-				mset(x,y+j,6)
-				i=1
-			end
-			j+=1
-		end
-		j=0
-		while mget(x,y+j)==4 do
-			local i=1
-			while mget(x+i,y+j)==4 do
-				mset(x+i,y+j,6)
-				i+=1
-			end
-			i=-1
-			while mget(x+i,y+j)==4 do
-				mset(x+i,y+j,6)
-				i-=1
-			end
-			if mget(x,y+j)==4 then
-				mset(x,y+j,6)
-				i=1
-			end
-			j-=1
-		end]]
-		
-		--[[
-		if od.dir=="x" then
-			local j=1
-			local i=0
-			if mget(x,y+1)!=4 then
-				j=-1
-			end
-			if mget(x,y-1)!=4 then
-				j=1
-			end
-			
-			while mget(x,y+i)==4 do
-				mset(x,y+i,6)
-				i+=j
-			end
-			i=0
-			if mget(x+1,y)==4 then
-				for j=-1,1,2 do
-					while mget(x+1,y+i)==4 do
-						mset(x+1,y+i,6)
-						i+=j
-					end
-				end
-			end
-			
-		end
-		if od.dir=="y" then
-			local j=1
-			local i=0
-			if mget(x+1,y)!=4 then
-				j=-1
-			end
-			if mget(x-1,y)!=4 then
-				j=1
-			end
-			while mget(x+i,y)==4 do
-				mset(x+i,y,6)
-				i+=j
-			end
-			i=0
-			if mget(x,y+1)==4 then
-				for j=-1,1,2 do
-					while mget(x+i,y)==4 do
-						mset(x+i,y-j,6)
-						i+=j
-					end
-				end
-			end
-			i=0
-			if mget(x,y-1)==4 then
-				for j=-1,1,2 do
-					while mget(x+i,y)==4 do
-						mset(x+i,y-j,6)
-						i+=j
-					end
-				end
-			end
-			
-		end
-	]]	
+		xdoors(x,y,-1)		
 	end
 end
 
@@ -685,14 +615,14 @@ function sortbyx(a)
 end
 
 __gfx__
-0000000055555551000000007777777d1111111200000000eeeeeeee000000000000000000000000000000000000000000000000000000000000000000000000
-0000000050000001000000007666666d1444444200000000eeeeeeee000000000000000000000000000000000000000000000000000000000000000000000000
-0070070050000001000000007666666d1444444200000000eeeeeeee000000000000000000000000000000000000000000000000000000000000000000000000
-0007700050000001000000007667d66d1444444200000000eeeeeeee000000000000000000000000000000000000000000000000000000000000000000000000
-000770005000000100000000766dd66d1444444200000000eeeeeeee000000000000000000000000000000000000000000000000000000000000000000000000
-00700700500000010000d0007666666d1444444200008000eeeeeeee000000000000000000000000000000000000000000000000000000000000000000000000
-0000000050000001000000007666666d1444444200000000eeeeeeee000000000000000000000000000000000000000000000000000000000000000000000000
-000000001111111100000000dddddddd2222222200000000eeeeeeee000000000000000000000000000000000000000000000000000000000000000000000000
+0000000055555551000000007777777d1111111200000000eeeeeeeecccccccc0000000000000000000000000000000000000000000000000000000000000000
+0000000050000001000000007666666d1444444200000000eeeeeeeecccccccc0000000000000000000000000000000000000000000000000000000000000000
+0070070050000001000000007666666d1444444200000000eeeeeeeecccccccc0000000000000000000000000000000000000000000000000000000000000000
+0007700050000001000000007667d66d1444444200000000eeeeeeeecccccccc0000000000000000000000000000000000000000000000000000000000000000
+000770005000000100000000766dd66d1444444200000000eeeeeeeecccccccc0000000000000000000000000000000000000000000000000000000000000000
+00700700500000010000d0007666666d1444444200008000eeeeeeeecccccccc0000000000000000000000000000000000000000000000000000000000000000
+0000000050000001000000007666666d1444444200000000eeeeeeeecccccccc0000000000000000000000000000000000000000000000000000000000000000
+000000001111111100000000dddddddd2222222200000000eeeeeeeecccccccc0000000000000000000000000000000000000000000000000000000000000000
 00888800008888000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 08dddd8008d77d800000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 8dd77dd88d77d7d80000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
