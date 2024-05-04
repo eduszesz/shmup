@@ -411,12 +411,60 @@ function setdoors()
 	end
 end
 
+function ydoors(x,y,j)
+ local _j=j
+ local j=0
+	while mget(x+j,y)==4 do 
+		local i=1
+		while mget(x+j,y+i)==4 do
+			mset(x+j,y+i,6)
+			i+=1
+		end
+		i=-1
+		while mget(x+j,y+i)==4 do
+			mset(x+j,y+i,6)
+			i-=1
+		end
+		if mget(x+j,y)==4 then
+			mset(x+j,y,6)
+			i=1
+		end
+		j+=_j
+	end
+
+end
+
+function xdoors(x,y,j)
+	local _j=j
+	while mget(x,y+j)==4 do
+		local i=1
+		while mget(x+i,y+j)==4 do
+			mset(x+i,y+j,6)
+			i+=1
+		end
+		i=-1
+		while mget(x+i,y+j)==4 do
+			mset(x+i,y+j,6)
+			i-=1
+		end
+		if mget(x,y+j)==4 then
+			mset(x,y+j,6)
+			i=1
+		end
+		j+=_j
+	end
+end
+
 function opendoors()
 	for od in all(opdoors) do
 		local x,y=od.x,od.y
-		
+		ydoors(x,y,1)
+		ydoors(x,y,-1)
+		xdoors(x,y,1)
+		xdoors(x,y,-1)
+		--[[
 		local j=0
-		while 
+		while mget(x+j,y)==4 do 
 			local i=1
 			while mget(x+j,y+i)==4 do
 				mset(x+j,y+i,6)
@@ -434,6 +482,7 @@ function opendoors()
 			j+=1
 		end
 		j=0
+	
 		while mget(x,y+j)==4 do
 			local i=1
 			while mget(x+i,y+j)==4 do
@@ -468,7 +517,7 @@ function opendoors()
 				i=1
 			end
 			j-=1
-		end
+		end]]
 		
 		--[[
 		if od.dir=="x" then
