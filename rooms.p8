@@ -180,7 +180,7 @@ function mkmaze()
 			end
 		end
 	end
-	
+	--test()
 	setdoors()
 	
 end
@@ -425,8 +425,23 @@ function setdoors()
 			end
 		end
 	end
+	debug[1]=#tledoors
 	for d in all(tledoors) do
 		local sum=0
+		--[[
+		if mget(d.x+1,d.y)==2 then
+			sum+=1
+		end	
+		if mget(d.x-1,d.y)==2 then
+			sum+=1
+		end
+		if mget(d.x,d.y+1)==2 then
+			sum+=1
+		end
+		if mget(d.x,d.y-1)==2 then
+			sum+=1
+		end]]
+					
 		for i=-1,1,2 do
 			if mget(d.x+i,d.y)==2 then
 						sum+=1
@@ -437,9 +452,7 @@ function setdoors()
 				sum+=1
 			end
 		end
-		
-	end
-	if sum==3 then
+		if sum==3 then
 		local x,y=0,0
 		for i=-1,1,2 do
 			if mget(d.x+i,d.y)==3 then
@@ -456,6 +469,9 @@ function setdoors()
 			end
 		end
 	end
+	end
+	
+	
 end
 
 function ydoors(x,y,j)
@@ -614,6 +630,17 @@ function sortbyx(a)
     end
 end
 
+function test()
+	local r=rooms[1]
+	mset(r.x+1,r.y+3,4)
+	mset(r.x+3,r.y+3,3)
+	mset(r.x+r.x2-1,r.y+3,4)
+	mset(r.x+r.x2-3,r.y+3,3)
+	mset(r.x+3,r.y+1,4)
+	mset(r.x+3,r.y+3,3)
+	mset(r.x+3,r.y+r.y2-1,4)
+	mset(r.x+3,r.y+r.y2-3,3)
+end
 __gfx__
 0000000055555551000000007777777d1111111200000000eeeeeeeecccccccc0000000000000000000000000000000000000000000000000000000000000000
 0000000050000001000000007666666d1444444200000000eeeeeeeecccccccc0000000000000000000000000000000000000000000000000000000000000000
