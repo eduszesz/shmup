@@ -8,6 +8,7 @@ function _init()
 	ways={}
 	doors={}
 	tledoors={}
+	tleways={}
 	auxt={}
 	map_w=1024
 	map_h=256
@@ -182,6 +183,7 @@ function mkmaze()
 	end
 	--test()
 	setdoors()
+	getways()
 	
 end
 
@@ -201,6 +203,8 @@ function clearmap()
 	rooms={}
 	ways={}
 	doors={}
+	tledoors={}
+	tleways={}
 	for x=0,127 do
 		for y=0,31 do
 			mset(x,y,0)
@@ -342,6 +346,17 @@ function yways(x1,y1,x2,y2)
 	auxt={x1,y1,x2,y2}	
 end
 
+function getways()
+	for x=0,127 do
+		for y=0,31 do
+			if mget(x,y)==2 then
+				local w={x=x,y=y}
+				add(tleways,w)
+			end
+		end
+	end
+end
+
 function setdoors()
 	for x=0,127 do
 		mset(x,0,1)
@@ -396,22 +411,22 @@ function setdoors()
 				add(dr,{x=ix+w,y=y+iy})
 			end
 		end
-		if #du<5 then
+		if #du<6 then
 			for d in all(du) do
 				mset(d.x,d.y,4)
 			end
 		end
-		if #db<5 then
+		if #db<6 then
 			for d in all(db) do
 				mset(d.x,d.y,4)
 			end
 		end
-		if #dl<5 then
+		if #dl<6 then
 			for d in all(dl) do
 				mset(d.x,d.y,4)
 			end
 		end
-		if #dr<5 then
+		if #dr<6 then
 			for d in all(dr) do
 				mset(d.x,d.y,4)
 			end
@@ -425,22 +440,9 @@ function setdoors()
 			end
 		end
 	end
-	debug[1]=#tledoors
+
 	for d in all(tledoors) do
 		local sum=0
-		--[[
-		if mget(d.x+1,d.y)==2 then
-			sum+=1
-		end	
-		if mget(d.x-1,d.y)==2 then
-			sum+=1
-		end
-		if mget(d.x,d.y+1)==2 then
-			sum+=1
-		end
-		if mget(d.x,d.y-1)==2 then
-			sum+=1
-		end]]
 					
 		for i=-1,1,2 do
 			if mget(d.x+i,d.y)==2 then
@@ -534,13 +536,24 @@ function drrooms()
 	local i=1
 	rectfill(x,y,x+127,y+31,0)
 	rect(x,y,x+127,y+31,8)
+	for w in all(tleways) do
+		local wx=w.x+x
+		local wy=w.y+y
+		pset(wx,wy,2)
+	end
 	for r in all(rooms) do
 		local rx=r.x+x
 		local ry=r.y+y
 		rect(rx,ry,rx+r.x2,ry+r.y2,8)
-		print(i,rx,ry,7)
+		print(i,rx+2,ry+2,7)
 		i+=1
 	end
+	for d in all(tledoors) do
+		local dx=d.x+x
+		local dy=d.y+y
+		pset(dx,dy,7)
+	end
+	
 	pset(x+flr(p.x/8),y+flr(p.y/8),12)
 	
 end
