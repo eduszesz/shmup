@@ -9,6 +9,7 @@ function _init()
 	doors={}
 	tledoors={}
 	tleways={}
+	fog={}
 	auxt={}
 	map_w=1024
 	map_h=256
@@ -16,7 +17,8 @@ function _init()
 							x=64,
 							y=64,
 							dx=0,
-							dy=0}
+							dy=0,
+							box={x1=0,y1=0,x2=7,y2=7}}
 	
 end
 
@@ -26,6 +28,7 @@ function _update()
 	if btnp(🅾️) then
 		clearmap()
 		mkmaze()
+		mkfog()
 		setpl()
 	end
 	
@@ -79,6 +82,7 @@ function _update()
 	p.y+=p.dy
 	
 	opendoors()
+	unfog()
 end
 
 function _draw()
@@ -98,6 +102,7 @@ function _draw()
 		p.sp=16
 	end
 	spr(p.sp,p.x,p.y)
+	drfog()
 end
 
 function mkmaze()
@@ -205,6 +210,7 @@ function clearmap()
 	doors={}
 	tledoors={}
 	tleways={}
+	fog={}
 	for x=0,127 do
 		for y=0,31 do
 			mset(x,y,0)
@@ -558,6 +564,40 @@ function drrooms()
 	
 end
 
+function  mkfog()
+	for x=0,127 do
+		for y=0,31 do
+			local tle=mget(x,y)
+			if tle>1 then
+				local f={x=x*8,
+													y=y*8,
+													flag=fget(tle),
+													box={x1=0,y1=0,x2=7,y2=7}}
+				add(fog,f)
+			end
+		end
+	end
+end
+
+function drfog()
+	for f in all(fog) do
+		local fx=f.x
+		local fy=f.y
+		local fx2=8+f.x
+		local fy2=8+f.y
+		rectfill(fx,fy,fx2,fy2,0)
+	end
+end
+
+function unfog()
+	for f in all(fog) do
+		local _p={x=p.x,y=p.y,box={x1=-15,y1=-15,x2=23,y2=23}}
+		if coll(_p,f) then
+			del(fog,f)
+		end
+	end
+end
+
 function cam(_x,_y)
 	camx,camy=_x-64,_y-64
 	if camx<0 then --camera lower x limit
@@ -643,17 +683,7 @@ function sortbyx(a)
     end
 end
 
-function test()
-	local r=rooms[1]
-	mset(r.x+1,r.y+3,4)
-	mset(r.x+3,r.y+3,3)
-	mset(r.x+r.x2-1,r.y+3,4)
-	mset(r.x+r.x2-3,r.y+3,3)
-	mset(r.x+3,r.y+1,4)
-	mset(r.x+3,r.y+3,3)
-	mset(r.x+3,r.y+r.y2-1,4)
-	mset(r.x+3,r.y+r.y2-3,3)
-end
+
 __gfx__
 0000000055555551000000007777777d1111111200000000eeeeeeeecccccccc0000000000000000000000000000000000000000000000000000000000000000
 0000000050000001000000007666666d1444444200000000eeeeeeeecccccccc0000000000000000000000000000000000000000000000000000000000000000
