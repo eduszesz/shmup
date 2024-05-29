@@ -8,16 +8,12 @@ function _init()
 	t=0
 	state="start"
 	ngen=0
-	ypop=0
-	yspd=0
+	ypop=110
+	yspd=12
 	selc=0
-	initpop=0.1
-	genspd=3
 	debug={}
 	agen={}
-	emptymap()
-	
-		
+	emptymap()		
 end
 
 function _update()
@@ -45,6 +41,12 @@ function _update()
 				yspd+=1
 			end
 		end
+		if yspd<0 then yspd=0 end
+		if yspd>127 then yspd=127 end
+		if ypop<0 then ypop=0 end
+		if ypop>127 then ypop=127 end
+		initpop=(-ypop/127)+1
+		genspd=flr((31*yspd/127)+1)
 		if btnp(❎)then
 			firstgen()
 			gridst()
@@ -70,13 +72,18 @@ function _draw()
 		print(debug[i],2,-1+i*9,8)
 	end
 	if state=="start" then
-		line(2,127,2,ypop,11)
-		line(125,127,125,yspd,12)
+		line(2,ypop,2,127,11)
+		line(125,yspd,125,127,12)
 		if selc==0 then
-			rect(0,0,4,127,7)
+			rect(0,0,4,127,6)
+			--print(initpop,64,64,13)
+			print("initial population",25,122,11)
 		else
-			rect(123,0,127,127,7)
+			rect(123,0,127,127,6)
+			--print(genspd,64,64,13)
+			print("simulation speed",30,122,12)
 		end
+		print("press ❎ to start",32,64,8)
 		print("⬅️",6,ypop,11)
 		print("➡️",115,yspd,12)
 		print("conway's game of life",22,0,11)
@@ -88,6 +95,7 @@ function _draw()
 			pset(g.x,g.y,g.sp)
 		end
 		print("generations: "..ngen,2,0,11)
+		print("🅾️ to reset",72,0,13)
 	end
 end
 
@@ -151,16 +159,11 @@ end
 
 function resetsim()
 	t=0
-	--state="start"
+	state="start"
 	ngen=0
-	initpop=0.1
-	genspd=3
 	debug={}
 	agen={}
 	emptymap()
-	firstgen()
-	gridst()
-
 end
 __gfx__
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
