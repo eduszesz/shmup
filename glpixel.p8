@@ -50,6 +50,7 @@ function _update()
 		initpop=(-ypop/127)+1
 		genspd=flr((31*yspd/127)+1)
 		if btnp(🅾️) then
+				
 				state="draw"
 		end
 		
@@ -73,8 +74,10 @@ function _update()
 			cury+=1
 		end
 		if btnp(🅾️) then
-			local g={x=curx+1,y=cury+1,sp=7,nb=nil}
+			if pget(curx+1,cury+1)==0 then
+				local g={x=curx+1,y=cury+1,sp=7,nb=nil}
 				add(agen,g)
+			end
 		end
 		if btnp(❎) then
 			gridst()
