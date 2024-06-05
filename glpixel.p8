@@ -23,7 +23,7 @@ function _init()
 							{x=32,y=64,sp=7,nb=nil},
 							}
 	agen={}
-	--emptymap()
+	emptymap()
 	curx=64
 	cury=64		
 end
@@ -84,15 +84,18 @@ function _update()
 			cury+=1
 		end
 		if btnp(🅾️) then
-			local s={2,3,4,5,6,7}
+			--local s={2,3,4,5,6,7}
 			--mset(curx/8,cury/8,rnd(s))
 			if pget(curx+1,cury+1)==0 then
-				local g={x=curx+1,y=cury+1,sp=7,nb=nil}
-				--add(agen,g)
+				local x,y=curx+1,cury+1
+				for g in all(agen) do
+					if g.x==x and g.y==y then
+						g.sp=7
+					end
+				end				
 			end
 		end
 		if btnp(❎) then
-			getdr()
 			gridst()
 			state="game"
 		end
@@ -104,7 +107,6 @@ function _update()
 				gridst()
 				ngen+=1
 			end
-			debug[1]=#agen
 		end
 		if btnp(🅾️) then
 			resetsim()
@@ -136,9 +138,10 @@ function _draw()
 	
 	if state=="draw" then
 		spr(1,curx,cury)
-		for g in all(dgen) do
+		for g in all(agen) do
 			pset(g.x,g.y,g.sp)
 		end
+		spr(1,curx,cury)
 	end
 	
 	if state=="game" then
@@ -155,27 +158,42 @@ end
 
 function emptymap()
 	for x=0,127 do
-		for y=0,127 do
+		for y=9,127 do
 			pset(x,y,0)
+			local g={x=x,y=y,sp=0,nb=nil}
+			add(agen,g)
 		end
 	end
 end
 
-function firstgen()
+function firstgen2()
 	for x=0,127 do
 		for y=9,127 do
 			local sp=0
 			if rnd()<initpop then
 				sp=7
 				pset(x,y,sp)
+				for g in all(agen) do
+					if g.x==x and g.y==y then
+						g.sp=7
+					end
+				end
 			end
-			local g={x=x,y=y,sp=sp,nb=nil}
-				add(agen,g)
+			--local g={x=x,y=y,sp=sp,nb=nil}
+			--add(agen,g)
 		end
 	end
 end
 
-
+function firstgen()
+	for g in all(agen) do
+		if rnd()<initpop then
+			g.sp=7
+			pset(x,y,7)
+		end
+	end	
+end
+	
 function gridst()
 	for g in all(agen) do
 		local nb=0
@@ -220,16 +238,7 @@ function resetsim()
 	emptymap()
 end
 
-function getdr()
-	for x=0,127 do
-		for y=0,127 do
-			if pget(x,y)==7 then
-				local g={x=x,y=y,sp=7,nb=nil}
-				add(agen,g)
-			end
-		end
-	end
-end
+
 __gfx__
 00000000880000000000000000077000000000000000777700000000000000000000000000000000000000000000000000000000000000000000000000000000
 00000000808000000000000000700700007770007777707000000000000000000000000000000000000000000000000000000000000000000000000000000000
