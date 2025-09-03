@@ -56,9 +56,13 @@ end
 
 function _draw()
 	cls()
-	spr(p.sp,p.x,p.y,2,1)
-	spr(b.sp,b.x,b.y)
+	rrect(p.x,p.y,15,4,2,11)
+	rrect(b.x,b.y,4,4,2,11)
+	--spr(p.sp,p.x,p.y,2,1)
+	--spr(b.sp,b.x,b.y)
 	rect(0,0,127,127,7)
+	--rect(p.x+p.box.x1,p.y+p.box.y1,p.x+p.box.x2,p.y+p.box.y2,10)
+	--rect(b.x+b.box.x1,b.y+b.box.y1,b.x+b.box.x2,b.y+b.box.y2,10)
 end
 
 function reflect(_dir) --_dir ="x" or "y"
