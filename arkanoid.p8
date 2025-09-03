@@ -5,8 +5,8 @@ __lua__
 --by eduszesz
 
 function _init()
-	p={sp=1,x=2,y=120,dx=0,dy=0, box={x1=0,y1=0,x2=15,y2=5}}
-	b={sp=3,x=p.x+4,y=p.y-6,dx=1, dy=1, v=3, ang=0.18, box={x1=2,y1=2,x2=5,y2=5}}
+	p={sp=1,x=2,y=120,dx=0,dy=0, box={x1=0,y1=0,x2=14,y2=3}}
+	b={sp=3,x=p.x+5,y=p.y-4,dx=1, dy=1, v=3, ang=0.18, box={x1=0,y1=0,x2=3,y2=3}}
 	bs="on pad" -- ball state
 	
 end
@@ -61,8 +61,8 @@ function _draw()
 	--spr(p.sp,p.x,p.y,2,1)
 	--spr(b.sp,b.x,b.y)
 	rect(0,0,127,127,7)
-	--rect(p.x+p.box.x1,p.y+p.box.y1,p.x+p.box.x2,p.y+p.box.y2,10)
-	--rect(b.x+b.box.x1,b.y+b.box.y1,b.x+b.box.x2,b.y+b.box.y2,10)
+	rect(p.x+p.box.x1,p.y+p.box.y1,p.x+p.box.x2,p.y+p.box.y2,10)
+	rect(b.x+b.box.x1,b.y+b.box.y1,b.x+b.box.x2,b.y+b.box.y2,10)
 end
 
 function reflect(_dir) --_dir ="x" or "y"
