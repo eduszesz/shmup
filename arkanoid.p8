@@ -5,25 +5,41 @@ __lua__
 --by eduszesz
 
 function _init()
-	p={sp=1,x=2,y=120,dx=0,dy=0, box={x1=0,y1=0,x2=14,y2=3}}
+	p={sp=1,x=2,y=120,dx=0,dir=true, box={x1=0,y1=0,x2=14,y2=3}}
 	b={sp=3,x=p.x+5,y=p.y-4,dx=1, dy=1, v=3, ang=0.18, box={x1=0,y1=0,x2=3,y2=3}}
 	bs="on pad" -- ball state
+	bricks={}
+	for x=1,128,8 do
+		for y=1,24,8 do
+			local br={x=x,
+					y=y,
+					c=12,
+					box={x1=0,y1=0,x2=7,y2=7}}
+			add(bricks,br)
+		end
+	end
 	
 end
 
 function _update()
 	p.dx=0
-	p.dy=0
+
 	if btn(⬅️) then
 		p.dx=-4
+		p.dir=true
 	end
 	if btn(➡️) then
 		p.dx=4
+		p.dir=false
 	end
 	p.x+=p.dx
-	p.y+=p.dy
+	
+	if p.x<1 then p.x=1 end
+	if p.x>112 then p.x=112 end
+	
+	
 	if bs=="on pad" then
-		b.x+=p.dx
+		b.x=p.x+5
 	end
 	
 	if btnp(5) then
@@ -39,9 +55,18 @@ function _update()
 		end
 		
 		if coll(p,b) then
-			b.ang+=0.2-rnd(0.3)
-			reflect("x")
+			
 			reflect("y")
+			
+		end
+		
+		for br in all(bricks) do
+			if coll(b,br) then
+				reflect("x")
+				reflect("y")
+				del(bricks,br)
+				b.ang=0.2-rnd(0.3)
+			end
 		end
 		
 		b.x+=b.v*cos(b.ang)*b.dx
@@ -61,8 +86,11 @@ function _draw()
 	--spr(p.sp,p.x,p.y,2,1)
 	--spr(b.sp,b.x,b.y)
 	rect(0,0,127,127,7)
-	rect(p.x+p.box.x1,p.y+p.box.y1,p.x+p.box.x2,p.y+p.box.y2,10)
-	rect(b.x+b.box.x1,b.y+b.box.y1,b.x+b.box.x2,b.y+b.box.y2,10)
+	--rect(p.x+p.box.x1,p.y+p.box.y1,p.x+p.box.x2,p.y+p.box.y2,10)
+	--rect(b.x+b.box.x1,b.y+b.box.y1,b.x+b.box.x2,b.y+b.box.y2,10)
+	for br in all(bricks) do
+		rrect(br.x,br.y,8,8,2,br.c)
+	end
 end
 
 function reflect(_dir) --_dir ="x" or "y"
