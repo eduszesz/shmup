@@ -27,19 +27,30 @@ function _init()
 	
 	bs="on pad" -- ball state
 	bricks={}
-	for x=1,128,8 do
-		for y=1,24,8 do
-			local br={x=x,
-					y=y,
-					c=12,
-					box={x1=0,y1=0,x2=7,y2=7}}
-			add(bricks,br)
-		end
+	lvl={{1,1,0,0,1,1,1,1},
+						{1,1,1,0,0,1,1,1},
+						{1,1,1,1,0,0,1,1},
+						{1,1,1,1,1,0,0,1},
+							}
+	
+	read_lvl()
+	
+	ffield={}
+	for x=1,128,16 do
+		
+			local ff={x=x,
+					y=128-rnd(3),
+					c=10,
+					}
+			add(ffield,ff)
+		
 	end
 	
+	t=0
 end
 
 function _update()
+	t+=1
 	p.dx=0
 
 	if btn(⬅️) then
@@ -89,8 +100,13 @@ function _update()
 				reflect("x")
 			end
 			
-			b.ang=0.1+rnd(0.15)
-			
+			if b.x<(p.x+3) or
+				b.x>(p.x+p.w-3) then
+				b.ang=0.07
+				reflect("x")
+			else	
+				b.ang=0.1+rnd(0.15)
+			end
 		end
 		
 		for br in all(bricks) do
@@ -110,6 +126,14 @@ function _update()
 		_init()
 	end
 	
+	if t%8<4 then
+		for ff in all(ffield) do
+			ff.x=ff.x+sin(t/2)
+			ff.y=ff.y+cos(t/2)
+			
+		end
+	end	
+	
 end
 
 function _draw()
@@ -122,11 +146,20 @@ function _draw()
 	--rect(p.x+p.box.x1,p.y+p.box.y1,p.x+p.box.x2,p.y+p.box.y2,10)
 	--rect(b.x+b.box.x1,b.y+b.box.y1,b.x+b.box.x2,b.y+b.box.y2,10)
 	for br in all(bricks) do
-		rrect(br.x,br.y,8,8,2,br.c)
+		rrect(br.x,br.y,15,7,0,br.c)
 	end
 	if bs=="on pad" then
 		line(b.x+2,b.y,b.x+10*b.dx*cos(b.amg),b.y+10*b.dy*sin(b.ang),8)
 	end
+	
+	for i=1,#ffield-1 do
+		local f1=ffield[i]
+		local f2=ffield[i+1]
+		line(f1.x,f1.y,f2.x,f2.y,10)
+	end
+	line(ffield[#ffield].x,ffield[#ffield].y,128,128,10)
+	
+	print(b.ang,8)
 end
 
 function reflect(_dir) --_dir ="x" or "y"
@@ -170,6 +203,31 @@ function coll(a,b)
     return false
  end
  return true 
+end
+function first_lvl()
+	for x=1,128,16 do
+		for y=16,40,8 do
+			local br={x=x,
+					y=y,
+					c=12,
+					box={x1=0,y1=0,x2=15,y2=7}}
+			add(bricks,br)
+		end
+	end
+end
+
+function read_lvl()
+	for x=1,#lvl[1] do
+		for y=1,#lvl do
+			if lvl[y][x]==1 then
+				local br={x=(-15+x*16),
+														y=(-7+y*8),
+														c=12,
+														box={x1=0,y1=0,x2=15,y2=7}}
+				add(bricks,br)
+			end									
+		end
+	end
 end
 
 __gfx__
