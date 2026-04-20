@@ -9,8 +9,7 @@ function _init()
 	doors={}
 	tledoors={}
 	tleways={}
-	fog={}
-	auxt={}
+	
 	map_w=1024
 	map_h=256
 	p={sp=16,
@@ -20,6 +19,7 @@ function _init()
 							dy=0,
 							box={x1=0,y1=0,x2=7,y2=7}}
 	
+	init_fov()
 end
 
 function _update()
@@ -28,7 +28,8 @@ function _update()
 	if btnp(🅾️) then
 		clearmap()
 		mkmaze()
-		mkfog()
+		init_fov()
+		calc_fov()
 		setpl()
 	end
 	
@@ -82,7 +83,7 @@ function _update()
 	p.y+=p.dy
 	
 	opendoors()
-	unfog()
+	calc_fov()
 end
 
 function _draw()
@@ -90,9 +91,7 @@ function _draw()
 	map()
 	cam(p.x,p.y)
 	prdebug()
-	if minimap==1 then
-		drrooms()
-	end
+	
 	if p.dx==0 or p.dy==0 then
 		p.sp+=0.1
 		if p.sp>17.9 then
@@ -103,6 +102,9 @@ function _draw()
 	end
 	spr(p.sp,p.x,p.y)
 	drfog()
+	if minimap==1 then
+		drrooms()
+	end
 end
 
 function mkmaze()
@@ -564,38 +566,82 @@ function drrooms()
 	
 end
 
-function  mkfog()
-	for x=0,127 do
-		for y=0,31 do
-			local tle=mget(x,y)
-			if tle>1 then
-				local f={x=x*8,
-													y=y*8,
-													flag=fget(tle),
-													box={x1=0,y1=0,x2=7,y2=7}}
-				add(fog,f)
-			end
-		end
-	end
+function init_fov()
+    fov={}
+    for x=0,127 do
+        fov[x]={}
+        for y=0,31 do
+            -- 0: unseen, 1: memory, 2: visible
+            fov[x][y]=0 
+        end
+    end
+end
+
+function calc_fov()
+    -- Reset all currently visible tiles to 'memory' state
+    for x=0,127 do
+        for y=0,31 do
+            if (fov[x][y]==2) fov[x][y]=1
+        end
+    end
+
+    -- Get player tile center
+    local px=(p.x+3)/8
+    local py=(p.y+3)/8
+    local radius=6 -- Vision range
+
+    -- Cast rays in a circle
+    for a=0,1,0.01 do
+        local dx=cos(a)
+        local dy=sin(a)
+        local cx=px
+        local cy=py
+
+        for i=0,radius do
+            local tx=flr(cx)
+            local ty=flr(cy)
+
+            -- Bounds check
+            if tx>=0 and tx<=127 and ty>=0 and ty<=31 then
+                fov[tx][ty]=2
+                
+                -- Obtém as flags do tile atual
+                local tile_flags = mget(tx,ty)
+                
+                -- Para o raio se bater numa parede (flag 0) 
+                -- OU em uma porta fechada (flag 1)
+                if fget(tile_flags, 0) or fget(tile_flags, 1) then
+                    break
+                end
+            end
+            cx+=dx
+            cy+=dy
+        end
+    end
 end
 
 function drfog()
-	for f in all(fog) do
-		local fx=f.x
-		local fy=f.y
-		local fx2=8+f.x
-		local fy2=8+f.y
-		rectfill(fx,fy,fx2,fy2,0)
-	end
-end
+    -- Only draw fog for tiles currently on camera
+    local ctx=flr(camx/8)
+    local cty=flr(camy/8)
 
-function unfog()
-	for f in all(fog) do
-		local _p={x=p.x,y=p.y,box={x1=-15,y1=-15,x2=23,y2=23}}
-		if coll(_p,f) then
-			del(fog,f)
-		end
-	end
+    for x=ctx,ctx+16 do
+        for y=cty,cty+16 do
+            if x>=0 and x<=127 and y>=0 and y<=31 then
+                local state=fov[x][y]
+                
+                if state==0 then
+                    -- Unseen: Draw solid black
+                    rectfill(x*8,y*8,x*8+7,y*8+7,0)
+                elseif state==1 then
+                    -- Memory: Draw darkened dither pattern
+                    fillp(0x5a5a) 
+                    rectfill(x*8,y*8,x*8+7,y*8+7,0)
+                    fillp() -- Reset pattern for other drawings
+                end
+            end
+        end
+    end
 end
 
 function cam(_x,_y)
