@@ -9,27 +9,82 @@ function _init()
 	r=1
 	t=60
 	cl=7
+	x=56
+	y=56
+	dx=0
+	dy=0
+	cx=0
+	cy=0
 end
 
 function _update()
 	pal()
 	if btnp(4) or btnp(5) then
 		t=0
+		dx,dy=flr(rnd(5)+5),flr(rnd(5)+5)
+		
 	end
 	if t<60 then
 		t+=1
+		move()
 		if t%8<4 then
 			r=rnd(sp)
 			pal(2,14)
 			pal(14,2)
 		end
+		if t>30 then
+			dx=dx*0.92
+			dy=dy*0.92
+			cx=cx*0.6
+			cy=cy*0.6
+		end
+	else
+		dx,dy=0,0	
+		cx,cy=0,0	
 	end
 end
 
 function _draw()
 	cls()
-	spr(r,64-8,64-8,2,2)
-	rect(0,0,127,127,cl)
+	rectfill(-10,-10,137,137,cl)
+	rectfill(2,2,125,125,0)
+	camera(cx,cy)
+	spr(r,x,y,2,2)
+end
+
+function move()
+	if x>111 or x<2 then
+		x=mid(2,x,111)
+		reflect("x")
+	end
+	if y>111 or y<2 then
+		y=mid(2,y,111)
+		reflect("y")
+	end
+	x+=dx
+	y+=dy
+end
+
+function reflect(_dir) --_dir ="x" or "y"
+	local dir=_dir
+	sfx(0)
+	if dir=="x" then
+		if dx!=0 then
+			dx=dx*(-1)
+			cx=cx*(-1)
+		end
+		
+	end
+	if dir=="y" then
+		if dy!=0 then
+			dy=dy*(-1)
+			cy=cy*(-1)
+		end
+	end
+	if dx<0 then cx=-1 end
+	if dx>0 then cx=1 end
+	if dy<0 then cy=-1 end
+	if dy>0 then cy=1 end
 end
 __gfx__
 0000000000eeeeeeeeeeee0000eeeeeeeeeeee0000eeeeeeeeeeee0000eeeeeeeeeeee0000eeeeeeeeeeee0000eeeeeeeeeeee00000000000000000000000000
@@ -178,3 +233,5 @@ __label__
 70000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000007
 77777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777
 
+__sfx__
+a9010000184401d32013410084101b300073000630005300043000430003300033000230002300023000230001300013000130000300003000530004300000000000000000000000000000000000000000000000
