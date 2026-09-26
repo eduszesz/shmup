@@ -5,13 +5,7 @@ __lua__
 --by eduszesz
 
 function _init()
-	bg={}
-	for i=0,15 do
-		for j=0,15 do
-			--bg[j][i]=1
-		end
-	end
-	
+		
 end
 
 function _update()
